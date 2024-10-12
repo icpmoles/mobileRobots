@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(pub_sub)
 
-## Find catkin and any catkin packages
+## Find catkin and any catkin packagess
 find_package(catkin REQUIRED COMPONENTS roscpp std_msgs)
 
 ## Declare a catkin package
