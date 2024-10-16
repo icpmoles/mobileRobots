@@ -1,0 +1,6 @@
+<launch>
+  <!-- load parameter file -->
+  <rosparam file="$(find hello_world)/config/node_example_params.yaml" command="load"/>
+
+  <node pkg="hello_world" type="node_example" name="node_example" output="screen"/>
+</launch>

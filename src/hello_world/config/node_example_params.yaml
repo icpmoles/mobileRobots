@@ -1,0 +1,3 @@
+# Node example configuration parameters
+  /node_example/run_period: 0.1           # Node execution period
+
