@@ -1,0 +1,7 @@
+<launch>
+  <!-- load parameter file -->
+  <rosparam file="$(find homework_1)/config/counter.yaml" command="load"/>
+
+  <node pkg="homework_1" type="homework_1_node" name="hw1_node" output="screen"/>
+  <!-- <node pkg="hello_world" type="node_example" name="node_example2" output="screen"/> -->
+</launch>

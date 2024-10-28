@@ -1,0 +1,3 @@
+# Node example configuration parameters
+  /hw1_node/ci: 0           # Node execution period
+  /hw1_node/cf: 10
