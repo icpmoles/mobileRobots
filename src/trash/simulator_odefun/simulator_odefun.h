@@ -105,6 +105,8 @@ void simulator_odefun::simulator_ode(const state_type &state, state_type &dstate
     const double x2 = state[1];
 
     // Model equations of a nonlinear pendulum with friction
+    // state[0] = theta
+    // state[1] = thetadot
     dstate[0] = x2;
     dstate[1] = -9.81/l*std::sin(x1)-d/(m*std::pow(l,2.0))*x2+u/(m*std::pow(l,2.0));
 }

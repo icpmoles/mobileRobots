@@ -1,5 +1,5 @@
 // it contains the main...., just copy paste and modify if needed
-#include "homework_2/node_simulator.h"
+#include "node_simulator.h"
 // #include "simulator_odefun/simulator_odefun.h"
 
 int main(int argc, char **argv)

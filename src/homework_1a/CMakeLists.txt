@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(homework_2)
+project(homework_1a)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
@@ -103,7 +103,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
   # INCLUDE_DIRS include
-  # # LIBRARIES homework_2
+  # # LIBRARIES homework_1a
   # CATKIN_DEPENDS roscpp std_msgs
   # DEPENDS system_lib
 )
@@ -121,7 +121,7 @@ include_directories(
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/homework_2.cpp
+#   src/${PROJECT_NAME}/homework_1a.cpp
 # )
 
 ## Add cmake target dependencies of the library
@@ -132,7 +132,7 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-# add_executable(${PROJECT_NAME}_node src/homework_2_node.cpp)
+# add_executable(${PROJECT_NAME}_node src/homework_1a_node.cpp)
 add_executable(node_controller src/node_controller.cpp src/node_controller_core.cpp)
 add_executable(node_simulator src/node_simulator.cpp src/node_simulator_core.cpp)
 
@@ -203,7 +203,7 @@ target_link_libraries(node_simulator
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_homework_2.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_homework_1a.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()

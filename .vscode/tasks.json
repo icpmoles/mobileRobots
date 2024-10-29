@@ -21,18 +21,18 @@
                 "instanceLimit": 1
             }
         },
-        // {
-        //     "label": "make_debug",
-        //     "type": "catkin_make",
-        //     "args": [
-        //         "--directory",
-        //         "${workspaceFolder}",
-        //         "-DCMAKE_BUILD_TYPE=Debug"
-        //     ],
-        //     "problemMatcher": [
-        //         "$catkin-gcc"
-        //     ]
-        // },
+        {
+            "label": "make_debug",
+            "command": "catkin_make",
+            "args": [
+                "--directory",
+                "${workspaceFolder}",
+                "-DCMAKE_BUILD_TYPE=Debug"
+            ],
+            "problemMatcher": [
+                "$catkin-gcc"
+            ]
+        },
         {
             "label": "rosCore",
             "type": "shell",

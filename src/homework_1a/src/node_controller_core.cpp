@@ -1,5 +1,5 @@
 // it contains the main...., just copy paste and modify if needed
-#include "homework_2/node_controller.h"
+#include "node_controller.h"
 
 int main(int argc, char **argv)
 {

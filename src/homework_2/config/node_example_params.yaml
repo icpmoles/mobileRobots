@@ -1,5 +1,0 @@
-# Node example configuration parameters
-  /node_simulator/m: 0.1           # Node execution period
-  /node_simulator/l: 0.3
-  /node_simulator/d: 0.3
-  /node_simulator/d: 1.0

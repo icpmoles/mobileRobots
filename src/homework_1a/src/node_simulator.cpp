@@ -1,6 +1,6 @@
-#include "homework_2/node_simulator.h"
+#include "node_simulator.h"
 // #include "simulator_odefun/simulator_odefun.h"
-#include "simulator_odefun/simulator_odefun.h"
+// #include "simulator_odefun/simulator_odefun.h"
 
 #define DT 0.001
 #define M 10.0
@@ -19,9 +19,11 @@ void node_sim::Prepare(void) // Janitor tasks
 	// float d;
 
 	/* Retrieve parameters from ROS parameter server */
-	std::string m_name,l_name,d_name,dt_name;
+	std::string m_name,l_name,d_name,dt_name,run_period_name;
 
 	// run_period
+	
+	run_period_name = ros::this_node::getName()+"/run_period";
 	m_name = ros::this_node::getName()+"/m";
 	
 	d_name = ros::this_node::getName()+"/d";
@@ -37,23 +39,23 @@ void node_sim::Prepare(void) // Janitor tasks
 	// FullParamName is a path
 	// RunPeriod is where it stores the parameter
 
-	// if (true == Handle.getParam(m_name, RunPeriod))
-	// {
-	// 	ROS_INFO("Node %s: retrieved parameter %s.",
-	// 			ros::this_node::getName().c_str(), FullParamName.c_str());
+	if (true == Handle.getParam(run_period_name, RunPeriod))
+	{
+		ROS_INFO("Node %s: retrieved parameter %s.",
+				ros::this_node::getName().c_str(), run_period_name.c_str());
 
-	// 	// FullParamName.c_str() = some functions prefer a "C style" string
-	// 	// Some functions prefer it this way
-	// }
-	// else
-	// {
-	// 	ROS_ERROR("Node %s: unable to retrieve parameter %s.",
-	// 			ros::this_node::getName().c_str(), FullParamName.c_str());
-	// }
+		// FullParamName.c_str() = some functions prefer a "C style" string
+		// Some functions prefer it this way
+	}
+	else
+	{
+		ROS_ERROR("Node %s: unable to retrieve parameter %s.",
+				ros::this_node::getName().c_str(), run_period_name.c_str());
+	}
 
 	/* ROS topics */
 	// create sub/pub 
-	sim_subscriber = Handle.subscribe("/simulator_input", 1, &node_sim::sub_callback, this);
+	sim_subscriber = Handle.subscribe("/controller_cmd", 1, &node_sim::sub_callback, this);
 	// "/topic1",		topic name
 	// 1,  				buffer size. 1 = as real time as possible.
 	// &node_sim::topic1_MessageCallback, 
@@ -61,7 +63,7 @@ void node_sim::Prepare(void) // Janitor tasks
 	// this, 			pointer to the object of the class
 	// when a callback is implemented in an object way
 	// it needs to know the pointer to the node handle
- 	sim_publisher = Handle.advertise<geometry_msgs::Point>("/simlation_output", 1);
+ 	sim_publisher = Handle.advertise<std_msgs::Float64>("/simulation_output", 1);
 	time_publisher = Handle.advertise<rosgraph_msgs::Clock>("/clock", 1);
 	// std_msgs::Float64,  type of msg we are advertising
 	// "/topic2", 			topic name
@@ -70,6 +72,9 @@ void node_sim::Prepare(void) // Janitor tasks
     // simulator_odefun my_simulator(dt);
     // my_simulator.setInitialState(X10, X20);
     // my_simulator.setModelParams(m, l, d);
+	sim_state.resize(2); // specify size of state
+    sim_state[0] = 0.0;
+    sim_state[1] = 0.0;	
 
 	setInitialState(X10,X20);
 	sim_t = 0.0;
@@ -79,6 +84,8 @@ void node_sim::Prepare(void) // Janitor tasks
 	sim_u = 0.0;  // default value if it hasn't been received already
 
 	ROS_INFO("Node %s ready to run.", ros::this_node::getName().c_str());
+	
+	Simulator_Step();
 }
 
 void node_sim::setInitialState(double x1, double x2){
@@ -101,7 +108,7 @@ void node_sim::RunPeriodically(float Period)
 	//or call/receives a Ros:kill command
 	while (ros::ok()) 
 	{
-		PeriodicTask(); // tasks I actually do...
+		// PeriodicTask(); // tasks I actually do...
 
 		ros::spinOnce(); 
 		// after you completed your little tasks,
@@ -129,27 +136,12 @@ void node_sim::Shutdown(void)
 // to a message std_msgs::Float64 
 void node_sim::sub_callback(const std_msgs::Float64::ConstPtr& msg)
 {
+	
+	ROS_INFO("Sim: control u received");
 	/* Receive data from the topic */
 	sim_u = msg->data;
 
-	stepper.do_step(std::bind(&node_sim::simulator_ode, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3), sim_state, sim_t, sim_dt);
-
-    // Update time
-    sim_t += sim_dt;
-	// starts simulations
-	/* Put here the code related to the node task */
-	/* Publish something on the topic */
-    geometry_msgs::Point geo_msg; // init msg
-    geo_msg.x = sim_y1; // loads data into it
-	geo_msg.y = sim_y2; // loads data into it
-	sim_publisher.publish(geo_msg); // publish it.
-
-	// time pub
-	rosgraph_msgs::Clock clockMsg;
-	// what's the new time after running the simulation?
-
-	clockMsg.clock = ros::Time(sim_t);
-	time_publisher.publish(clockMsg);
+	Simulator_Step();
 
 }
 
@@ -157,10 +149,10 @@ void node_sim::PeriodicTask(void)
 {
 	
 
-	usleep(10);
+	// usleep(10);
 	/* Put here the code related to the node task */
 	/* Publish something on the topic */
-    // geometry_msgs::Point msg; // init msg
+    // std_msgs::Float64 msg; // init msg
     // msg.x = sim_y1; // loads data into it
 	// msg.y = sim_y2; // loads data into it
 	// sim_publisher.publish(msg); // publish it.
@@ -171,6 +163,33 @@ void node_sim::PeriodicTask(void)
 
 	// clockMsg.clock = ros::Time(sim_t);
 	// time_publisher.publish(clockMsg);
+}
+
+void node_sim::Simulator_Step(void)
+{
+	
+	ROS_INFO("Executing Simulator Step at t = %f", sim_t);
+	stepper.do_step(std::bind(&node_sim::simulator_ode, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3), sim_state, sim_t, sim_dt);
+
+    // Update time
+    sim_t += sim_dt;
+	// starts simulations
+	/* Put here the code related to the node task */
+	/* Publish something on the topic */
+    std_msgs::Float64 geo_msg; // init msg
+    geo_msg.data = sim_state[0]; // loads data into it
+	// geo_msg.y = sim_y2; // loads data into it
+	 // publish it.
+
+	// time pub
+	rosgraph_msgs::Clock clockMsg;
+	// what's the new time after running the simulation?
+
+	clockMsg.clock = ros::Time(sim_t);
+	time_publisher.publish(clockMsg);
+	sim_publisher.publish(geo_msg);
+	ROS_INFO("Simulator Step executed, new Time: + %f = %f",sim_dt,sim_t);
+
 }
 
 void node_sim::simulator_ode(const state_type &state, state_type &dstate, double t)

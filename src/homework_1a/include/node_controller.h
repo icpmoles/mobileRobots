@@ -9,6 +9,8 @@
 #define NAME_OF_THIS_NODE "node_example"
 
 #include "std_msgs/Float64.h"
+#include "geometry_msgs/Point.h"
+
 // i want to send float64 msgs between the example nodes
  
 class node_contr
@@ -20,22 +22,27 @@ class node_contr
     // ROS client library
     
     /* ROS topics */
-    ros::Subscriber example_subscriber;
-    ros::Publisher example_publisher;
+    ros::Subscriber y_subscriber;
+    ros::Publisher control_publisher;
     
     /* Parameters from ROS parameter server */
     // param_type ParamVar;
     // where to store the parameters retrieved by the param server
 
     /* ROS topic callbacks */
-    void topic1_MessageCallback(const std_msgs::Float64::ConstPtr& msg);
+    void ControllerCallback(const std_msgs::Float64::ConstPtr& msg);
  
     /* Node periodic task */
     void PeriodicTask(void);
+    void PID_Step(void);
     
     /* Node state variables */
+
+    // PID state variables
     double topic1_data;
-  
+    double u_act, uI_prev, y_act, ysp_act;
+    double a, b;
+    double theta, thetaD;
     
   public:
     double RunPeriod; 

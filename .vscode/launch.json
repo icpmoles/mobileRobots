@@ -2,16 +2,17 @@
     "version": "0.2.0",
     
     "configurations": [
+        
         {
             "name": "ROS: Attach",
             "type": "ros",
             "request": "attach"
         },
         {
-            "name": "ROS: Launch FP",
+            "name": "ROS: Launch PID_Sim",
             "type": "ros",
             "request": "launch",
-            "target": "${workspaceFolder}/src/first_project/launch/auto.launch",
+            "target": "${workspaceFolder}/src/homework_1a/launch/pid_simulator.launch",
             "preLaunchTask": "make_debug"
         },
         {

@@ -1,24 +1,31 @@
-#include "homework_2/node_controller.h"
+#include "node_controller.h"
 
 void node_contr::Prepare(void) // Janitor tasks
 {
-	 RunPeriod = RUN_PERIOD_DEFAULT;
 
 	/* Retrieve parameters from ROS parameter server */
-	std::string FullParamName;
+	std::string kp_path,ki_path,kd_path,run_period_name;
 
-	// run_period
-	FullParamName = ros::this_node::getName()+"/run_period";
+	// PID params get
 
-
-	// Handle.getParam(FullParamName, RunPeriod)
+	run_period_name = ros::this_node::getName()+"/run_period";
+	kp_path = ros::this_node::getName()+"/kp";
+	ki_path = ros::this_node::getName()+"/ki";
+	kd_path = ros::this_node::getName()+"/kd";
+	Handle.getParam(run_period_name, RunPeriod);
 	// FullParamName is a path
 	// RunPeriod is where it stores the parameter
 
-	if (true == Handle.getParam(FullParamName, RunPeriod))
+	// Initialize 
+	u_act   = 0.0;
+    uI_prev = 0.0;
+    y_act   = 0.0;
+    ysp_act = 0.0;
+
+	if (true == Handle.getParam(run_period_name, RunPeriod))
 	{
 		ROS_INFO("Node %s: retrieved parameter %s.",
-				ros::this_node::getName().c_str(), FullParamName.c_str());
+				ros::this_node::getName().c_str(), run_period_name.c_str());
 
 		// FullParamName.c_str() = some functions prefer a "C style" string
 		// Some functions prefer it this way
@@ -26,20 +33,20 @@ void node_contr::Prepare(void) // Janitor tasks
 	else
 	{
 		ROS_ERROR("Node %s: unable to retrieve parameter %s.",
-				ros::this_node::getName().c_str(), FullParamName.c_str());
+				ros::this_node::getName().c_str(), run_period_name.c_str());
 	}
 
 	/* ROS topics */
 	// create sub/pub 
-	example_subscriber = Handle.subscribe("/topic1", 1, &node_contr::topic1_MessageCallback, this);
+	y_subscriber = Handle.subscribe("/simulation_output", 1, &node_contr::ControllerCallback, this);
 	// "/topic1",		topic name
 	// 1,  				buffer size. 1 = as real time as possible.
-	// &node_contr::topic1_MessageCallback, 
+	// &node_contr::ControllerCallback, 
 	// function callback: what gets executed when a msg is received
 	// this, 			pointer to the object of the class
 	// when a callback is implemented in an object way
 	// it needs to know the pointer to the node handle
- 	example_publisher = Handle.advertise<std_msgs::Float64>("/topic2", 1);
+ 	control_publisher = Handle.advertise<std_msgs::Float64>("/controller_cmd", 1);
 
 	// std_msgs::Float64,  type of msg we are advertising
 	// "/topic2", 			topic name
@@ -47,7 +54,7 @@ void node_contr::Prepare(void) // Janitor tasks
 
 
 	/* Node variable initialization */
-	topic1_data = 0.0;  // default value if it hasn't been received already
+	y_act = 0.0;  // default value if it hasn't been received already
 
 	ROS_INFO("Node %s ready to run.", ros::this_node::getName().c_str());
 }
@@ -68,7 +75,7 @@ void node_contr::RunPeriodically(float Period)
 	//or call/receives a Ros:kill command
 	while (ros::ok()) 
 	{
-		PeriodicTask(); // tasks I actually do...
+		// PeriodicTask(); // tasks I actually do...
 
 		ros::spinOnce(); 
 		// after you completed your little tasks,
@@ -94,18 +101,33 @@ void node_contr::Shutdown(void)
 // constant 
 // & pointer
 // to a message std_msgs::Float64 
-void node_contr::topic1_MessageCallback(const std_msgs::Float64::ConstPtr& msg)
+void node_contr::ControllerCallback(const std_msgs::Float64::ConstPtr& msg)
 {
 	/* Receive data from the topic */
-	topic1_data = msg->data;
+	ROS_INFO("PID: measurement acquired");
+	y_act = msg->data;
+	// double thetaD = msg->y;
+	PID_Step();
 }
 
 void node_contr::PeriodicTask(void)
 {
 	/* Put here the code related to the node task */
-	/* Publish something on the topic */
-    std_msgs::Float64 msg; // init msg
-    msg.data = topic1_data; // loads data into it
-	example_publisher.publish(msg); // publish it.
+	// /* Publish something on the topic */
+    // std_msgs::Float64 msg; // init msg
+    // msg.data = topic1_data; // loads data into it
+	// control_publisher.publish(msg); // publish it.
 }
 
+void node_contr::PID_Step(void)
+{
+	ROS_INFO("Executing PID Step");
+	// calculate PID controls
+	double uI_act = uI_prev+a*(ysp_act-y_act);
+    double uP_act = b*(ysp_act-y_act);
+	u_act = uP_act+uI_act;
+
+    // Update the state
+    uI_prev = uI_act;
+	// send Control signal
+}

@@ -1,0 +1,14 @@
+# Node example configuration parameters
+  /node_simulator/m: 0.1           # Node execution period
+  /node_simulator/l: 0.3
+  /node_simulator/d: 0.3
+  /node_simulator/dt: 1.0
+  /node_simulator/run_period: 0.1
+
+  /node_controller/ts: 1.0 # controller T sampling = resolution of simulator
+  /node_controller/kd: 0.3
+  /node_controller/ki: 1.0
+  /node_controller/kp: 0.3
+  /node_controller/run_period: 0.1
+  
+  

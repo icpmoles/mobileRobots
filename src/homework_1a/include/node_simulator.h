@@ -33,6 +33,8 @@ class node_sim
     /* Node periodic task */
     void PeriodicTask(void);
     
+    void Simulator_Step(void);
+    
 
     // SIMULATOR ZONE
     /* Node state variables */
