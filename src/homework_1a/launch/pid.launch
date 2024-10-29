@@ -1,0 +1,9 @@
+<launch>
+  <!-- load parameter file -->
+  <rosparam file="$(find homework_1a)/config/node_example_params.yaml" command="load"/>
+  <!-- <rosparam param="/use_sim_time">true</rosparam> -->
+  <node pkg="homework_1a" type="node_controller" name="node_controller" output="screen"/>
+<!--   
+  <node pkg="homework_1a" type="node_simulator" name="node_simulator" output="screen" /> -->
+  <!-- <node pkg="hello_world" type="node_example" name="node_example2" output="screen"/>output="screen" -->
+</launch>

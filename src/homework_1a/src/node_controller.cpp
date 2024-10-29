@@ -38,7 +38,9 @@ void node_contr::Prepare(void) // Janitor tasks
 
 	/* ROS topics */
 	// create sub/pub 
-	y_subscriber = Handle.subscribe("/simulation_output", 1, &node_contr::ControllerCallback, this);
+	y_subscriber = Handle.subscribe("/simulation_output", 3, &node_contr::ControllerCallback, this);
+	
+	ROS_INFO("PID: listening to /simulation_output ");
 	// "/topic1",		topic name
 	// 1,  				buffer size. 1 = as real time as possible.
 	// &node_contr::ControllerCallback, 
@@ -46,7 +48,9 @@ void node_contr::Prepare(void) // Janitor tasks
 	// this, 			pointer to the object of the class
 	// when a callback is implemented in an object way
 	// it needs to know the pointer to the node handle
- 	control_publisher = Handle.advertise<std_msgs::Float64>("/controller_cmd", 1);
+ 	control_publisher = Handle.advertise<std_msgs::Float64>("/controller_cmd", 5,true);
+	
+	ROS_INFO("PID: advertising to /controller_cmd ");
 
 	// std_msgs::Float64,  type of msg we are advertising
 	// "/topic2", 			topic name
@@ -76,7 +80,7 @@ void node_contr::RunPeriodically(float Period)
 	while (ros::ok()) 
 	{
 		// PeriodicTask(); // tasks I actually do...
-
+		// ROS_INFO("PID Loop");
 		ros::spinOnce(); 
 		// after you completed your little tasks,
 		// execute eventual callbacks that you received in the meanwhile
@@ -130,4 +134,9 @@ void node_contr::PID_Step(void)
     // Update the state
     uI_prev = uI_act;
 	// send Control signal
+	std_msgs::Float64 msg; // init msg
+    msg.data = u_act; // loads data into it
+	control_publisher.publish(msg); // publish it.
+	
+	ROS_INFO("PID: u = %f, sp = %f, e = %f",u_act,ysp_act, ysp_act-y_act);
 }
