@@ -53,3 +53,4 @@ CATKIN_IGNORE
 
 # windows bullshit
 *:Zone.Identifier
+src/ros_tutorials
