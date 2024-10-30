@@ -4,7 +4,7 @@
 
 int main(int argc, char **argv)
 {
-  sleep(2);
+  // sleep(2);
   ros::init(argc, argv, NAME_OF_THIS_NODE); // initialization of the node w/ ROS master
   // NAME_OF_THIS_NODE needs to be unique, can be passed by roslaunch or taken from the header file
   

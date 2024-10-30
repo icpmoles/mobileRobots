@@ -48,7 +48,7 @@ void node_contr::Prepare(void) // Janitor tasks
 	// this, 			pointer to the object of the class
 	// when a callback is implemented in an object way
 	// it needs to know the pointer to the node handle
- 	control_publisher = Handle.advertise<std_msgs::Float64>("/controller_cmd", 5,true);
+ 	control_publisher = Handle.advertise<std_msgs::Float64>("/controller_cmd", 10);
 	
 	ROS_INFO("PID: advertising to /controller_cmd ");
 
@@ -84,8 +84,8 @@ void node_contr::RunPeriodically(float Period)
 		ros::spinOnce(); 
 		// after you completed your little tasks,
 		// execute eventual callbacks that you received in the meanwhile
-
-		LoopRate.sleep();
+		usleep(1000);
+		// LoopRate.sleep();
 		// sleep until the next time slot
 	}
 }

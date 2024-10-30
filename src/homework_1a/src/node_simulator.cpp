@@ -63,8 +63,8 @@ void node_sim::Prepare(void) // Janitor tasks
 	// this, 			pointer to the object of the class
 	// when a callback is implemented in an object way
 	// it needs to know the pointer to the node handle
- 	sim_publisher = Handle.advertise<std_msgs::Float64>("/simulation_output", 5,true);
-	time_publisher = Handle.advertise<rosgraph_msgs::Clock>("/clock", 2,true);
+ 	sim_publisher = Handle.advertise<std_msgs::Float64>("/simulation_output", 5);
+	time_publisher = Handle.advertise<rosgraph_msgs::Clock>("/clock", 10);
 	// std_msgs::Float64,  type of msg we are advertising
 	// "/topic2", 			topic name
 	// 1: buffer size, like for subscriber
@@ -78,6 +78,7 @@ void node_sim::Prepare(void) // Janitor tasks
 
 	setInitialState(X10,X20);
 	sim_t = 0.0;
+	iteration = 0;
     
 
 	/* Node variable initialization */
@@ -88,7 +89,7 @@ void node_sim::Prepare(void) // Janitor tasks
 
 	clockMsg.clock = ros::Time(0.0);
 	time_publisher.publish(clockMsg);
-
+ 	
 	ROS_INFO("Sim Node %s ready to run.", ros::this_node::getName().c_str());
 	
 }
@@ -103,27 +104,37 @@ void node_sim::RunPeriodically(float Period)
 {	
 
 	//
-	ros::Rate LoopRate(1.0/Period);
+	ros::WallRate  LoopRate(0.1/Period);
 
 	ROS_INFO("Node %s running periodically (T=%.2fs, f=%.2fHz).", ros::this_node::getName().c_str(), Period, 1.0/Period);
 
 	
-	Simulator_Step();
-	ROS_INFO("Sim: end of first simulation");
+	// Simulator_Step(true);
+	// ROS_INFO("Sim: end of first simulation");
+	// ros::spinOnce(); 
+	
+	// ROS_INFO("Sim: spinOnce");
+	// sleep(0.2);
+
+	
+	// ROS_INFO("Sim: spinOnce again");
 	// infinite cycle
 	// ros::ok always true unless: 
 	//ctrl+c from the terminal 
 	//or call/receives a Ros:kill command
 	while (ros::ok()) 
 	{
+		
+		ROS_INFO("Sim: ros ok loop?");
 		// PeriodicTask(); // tasks I actually do...
 		ros::spinOnce(); 
+		PeriodicTask(); 
 		// after you completed your little tasks,
 		// execute eventual callbacks that you received in the meanwhile
 		
 		// ROS_INFO("Simulator: new spin %f Hz",1/Period);
-		// LoopRate.sleep();
-		usleep(1000);
+		LoopRate.sleep();
+		// usleep(100000);
 		// sleep until the next time slot
 	}
 }
@@ -150,14 +161,37 @@ void node_sim::sub_callback(const std_msgs::Float64::ConstPtr& msg)
 	/* Receive data from the topic */
 	sim_u = msg->data;
 
-	Simulator_Step();
+	Simulator_Step(false);
 	ROS_INFO("Sim: end of callback");
 }
 
 void node_sim::PeriodicTask(void)
 {
+	if (iteration%10 == 0 ) Simulator_Step(false);
+
 	ROS_INFO("Simulator: periodic TASK");
 
+	
+	 // Update time
+    sim_t += (sim_dt/10.0);
+	// starts simulations
+	/* Put here the code related to the node task */
+	/* Publish something on the topic */
+    std_msgs::Float64 geo_msg; // init msg
+    geo_msg.data = sim_state[0]; // loads data into it
+	 // publish it.
+
+	// time pub
+	rosgraph_msgs::Clock clockMsg;
+	// what's the new time after running the simulation?
+
+	clockMsg.clock = ros::Time(sim_t);
+	time_publisher.publish(clockMsg);
+	sim_publisher.publish(geo_msg);
+	
+	
+	ROS_INFO("Simulator Step executed, new Time: + %f = %f",sim_dt,sim_t);
+	 ROS_INFO("Simulator Step executed, theta = %f",sim_state[0]);
 	// usleep(10);
 	/* Put here the code related to the node task */
 	/* Publish something on the topic */
@@ -172,33 +206,36 @@ void node_sim::PeriodicTask(void)
 
 	// clockMsg.clock = ros::Time(sim_t);
 	// time_publisher.publish(clockMsg);
+	iteration++;
 }
 
-void node_sim::Simulator_Step(void)
+void node_sim::Simulator_Step(bool multi)
 {
 	
 	ROS_INFO("Executing Simulator Step at t = %f", sim_t);
 	stepper.do_step(std::bind(&node_sim::simulator_ode, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3), sim_state, sim_t, sim_dt);
 
     // Update time
-    sim_t += sim_dt;
+    // sim_t += sim_dt;
 	// starts simulations
 	/* Put here the code related to the node task */
 	/* Publish something on the topic */
-    std_msgs::Float64 geo_msg; // init msg
-    geo_msg.data = sim_state[0]; // loads data into it
+    // std_msgs::Float64 geo_msg; // init msg
+    // geo_msg.data = sim_state[0]; // loads data into it
 	// geo_msg.y = sim_y2; // loads data into it
 	 // publish it.
 
 	// time pub
-	rosgraph_msgs::Clock clockMsg;
+	// rosgraph_msgs::Clock clockMsg;
 	// what's the new time after running the simulation?
 
-	clockMsg.clock = ros::Time(sim_t);
-	time_publisher.publish(clockMsg);
-	sim_publisher.publish(geo_msg);
-	ROS_INFO("Simulator Step executed, new Time: + %f = %f",sim_dt,sim_t);
-	ROS_INFO("Simulator Step executed, theta = %f",sim_state[0]);
+	// clockMsg.clock = ros::Time(sim_t);
+	// time_publisher.publish(clockMsg);
+	// sim_publisher.publish(geo_msg);
+	
+	
+	// ROS_INFO("Simulator Step executed, new Time: + %f = %f",sim_dt,sim_t);
+	// ROS_INFO("Simulator Step executed, theta = %f",sim_state[0]);
 }
 
 void node_sim::simulator_ode(const state_type &state, state_type &dstate, double t)

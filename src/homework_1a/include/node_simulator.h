@@ -33,7 +33,7 @@ class node_sim
     /* Node periodic task */
     void PeriodicTask(void);
     
-    void Simulator_Step(void);
+    void Simulator_Step(bool multi);
     
 
     // SIMULATOR ZONE
@@ -44,6 +44,7 @@ class node_sim
     state_type sim_state;
     boost::numeric::odeint::runge_kutta_dopri5 < state_type > stepper;
     void simulator_ode(const state_type &sim_state, state_type &sim_dstate, double t);
+    int iteration;
     
     
   public:
