@@ -11,5 +11,5 @@
   /node_controller/kp: 0.3
   /node_controller/run_period: 0.1
   
-  /subtick: 1.0 #in ms
+  /subtick: 0.001 #in s
   /tick_multiplier: 10 #integeer

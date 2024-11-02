@@ -34,9 +34,10 @@ void node_sim::Prepare(void) // Janitor tasks
 	Handle.getParam(l_name, sim_l);
 	Handle.getParam(d_name, sim_d);
 	
-	Handle.getParam(dt_name, sim_dt);
+	// Handle.getParam(dt_name, sim_dt);
 	Handle.getParam("/tick_multiplier",multiplier);
 	Handle.getParam("/subtick",subtick);
+	sim_dt = subtick*multiplier;
 	// Handle.getParam(FullParamName, RunPeriod)
 	// FullParamName is a path
 	// RunPeriod is where it stores the parameter
@@ -79,7 +80,7 @@ void node_sim::Prepare(void) // Janitor tasks
     sim_state[1] = 0.0;	
 
 	setInitialState(X10,X20);
-	sim_t = 0.0;
+	sim_t = 1.0;
 	iteration = 0;
     
 
@@ -174,7 +175,7 @@ void node_sim::PeriodicTask(void)
 	}
 	
 	
-	ROS_INFO("Simulator: periodic TASK");
+	// ROS_INFO("Simulator: periodic TASK");
 
 	
 	 // Update time
@@ -193,9 +194,6 @@ void node_sim::PeriodicTask(void)
 	clockMsg.clock = ros::Time(sim_t);
 	time_publisher.publish(clockMsg);
 	
-	
-	ROS_INFO("Simulator Step executed, new Time: + %f = %f",sim_dt,sim_t);
-	 ROS_INFO("Simulator Step executed, theta = %f",sim_state[0]);
 	// usleep(10);
 	/* Put here the code related to the node task */
 	/* Publish something on the topic */
@@ -213,7 +211,12 @@ void node_sim::PeriodicTask(void)
 	if (iteration%multiplier == 0 ) {
 		Simulator_Step(false);
 		
+		ROS_INFO("Simulation executed, new Time: + %f = %f",sim_dt,sim_t);
+	 	ROS_INFO("Simulator Step executed, theta = %f",sim_state[0]);
 		sim_publisher.publish(geo_msg);
+	} else {
+		
+		ROS_INFO("clock executed, new Time: + %f = %f",subtick,sim_t);
 	}
 	iteration++;
 }
