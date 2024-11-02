@@ -44,11 +44,14 @@ class node_sim
     state_type sim_state;
     boost::numeric::odeint::runge_kutta_dopri5 < state_type > stepper;
     void simulator_ode(const state_type &sim_state, state_type &sim_dstate, double t);
-    int iteration;
+    int iteration,loc_iteration;
+    int multiplier;
+    // double subtick;
+  
     
     
   public:
-    double RunPeriod; 
+    double subtick; 
   
     // we want to use it to pass it to the RunPeriodically in the _core.cpp
     // we make it public

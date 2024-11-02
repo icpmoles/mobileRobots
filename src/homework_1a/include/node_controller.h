@@ -43,9 +43,10 @@ class node_contr
     double u_act, uI_prev, y_act, ysp_act;
     double a, b;
     double theta, thetaD;
+    int multiplier;
     
   public:
-    double RunPeriod; 
+    double subtick; 
     // we want to use it to pass it to the RunPeriodically in the _core.cpp
     // we make it public 
     

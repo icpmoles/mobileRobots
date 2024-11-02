@@ -35,11 +35,13 @@ void node_sim::Prepare(void) // Janitor tasks
 	Handle.getParam(d_name, sim_d);
 	
 	Handle.getParam(dt_name, sim_dt);
+	Handle.getParam("/tick_multiplier",multiplier);
+	Handle.getParam("/subtick",subtick);
 	// Handle.getParam(FullParamName, RunPeriod)
 	// FullParamName is a path
 	// RunPeriod is where it stores the parameter
 
-	if (true == Handle.getParam(run_period_name, RunPeriod))
+	if (true == Handle.getParam(run_period_name, subtick))
 	{
 		ROS_INFO("Node %s: retrieved parameter %s.",
 				ros::this_node::getName().c_str(), run_period_name.c_str());
@@ -104,7 +106,7 @@ void node_sim::RunPeriodically(float Period)
 {	
 
 	//
-	ros::WallRate  LoopRate(0.1/Period);
+	ros::WallRate  LoopRate(1.0/Period);
 
 	ROS_INFO("Node %s running periodically (T=%.2fs, f=%.2fHz).", ros::this_node::getName().c_str(), Period, 1.0/Period);
 
@@ -125,7 +127,7 @@ void node_sim::RunPeriodically(float Period)
 	while (ros::ok()) 
 	{
 		
-		ROS_INFO("Sim: ros ok loop?");
+		// ROS_INFO("Sim: ros ok loop?");
 		// PeriodicTask(); // tasks I actually do...
 		ros::spinOnce(); 
 		PeriodicTask(); 
@@ -167,13 +169,16 @@ void node_sim::sub_callback(const std_msgs::Float64::ConstPtr& msg)
 
 void node_sim::PeriodicTask(void)
 {
-	if (iteration%10 == 0 ) Simulator_Step(false);
-
+	if (iteration == NUM_STEP) {
+		ros::shutdown();
+	}
+	
+	
 	ROS_INFO("Simulator: periodic TASK");
 
 	
 	 // Update time
-    sim_t += (sim_dt/10.0);
+    sim_t += (subtick);
 	// starts simulations
 	/* Put here the code related to the node task */
 	/* Publish something on the topic */
@@ -187,7 +192,6 @@ void node_sim::PeriodicTask(void)
 
 	clockMsg.clock = ros::Time(sim_t);
 	time_publisher.publish(clockMsg);
-	sim_publisher.publish(geo_msg);
 	
 	
 	ROS_INFO("Simulator Step executed, new Time: + %f = %f",sim_dt,sim_t);
@@ -206,6 +210,11 @@ void node_sim::PeriodicTask(void)
 
 	// clockMsg.clock = ros::Time(sim_t);
 	// time_publisher.publish(clockMsg);
+	if (iteration%multiplier == 0 ) {
+		Simulator_Step(false);
+		
+		sim_publisher.publish(geo_msg);
+	}
 	iteration++;
 }
 

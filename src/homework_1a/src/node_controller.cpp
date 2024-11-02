@@ -8,11 +8,14 @@ void node_contr::Prepare(void) // Janitor tasks
 
 	// PID params get
 
-	run_period_name = ros::this_node::getName()+"/run_period";
+	// run_period_name = ros::this_node::getName()+"/run_period";
 	kp_path = ros::this_node::getName()+"/kp";
 	ki_path = ros::this_node::getName()+"/ki";
 	kd_path = ros::this_node::getName()+"/kd";
-	Handle.getParam(run_period_name, RunPeriod);
+	// Handle.getParam(run_period_name, RunPeriod);
+
+	Handle.getParam("/tick_multiplier",multiplier);
+	Handle.getParam("/subtick",subtick);
 	// FullParamName is a path
 	// RunPeriod is where it stores the parameter
 
@@ -22,19 +25,19 @@ void node_contr::Prepare(void) // Janitor tasks
     y_act   = 0.0;
     ysp_act = 0.0;
 
-	if (true == Handle.getParam(run_period_name, RunPeriod))
-	{
-		ROS_INFO("Node %s: retrieved parameter %s.",
-				ros::this_node::getName().c_str(), run_period_name.c_str());
+	// if (true == Handle.getParam(run_period_name, RunPeriod))
+	// {
+	// 	ROS_INFO("Node %s: retrieved parameter %s.",
+	// 			ros::this_node::getName().c_str(), run_period_name.c_str());
 
-		// FullParamName.c_str() = some functions prefer a "C style" string
-		// Some functions prefer it this way
-	}
-	else
-	{
-		ROS_ERROR("Node %s: unable to retrieve parameter %s.",
-				ros::this_node::getName().c_str(), run_period_name.c_str());
-	}
+	// 	// FullParamName.c_str() = some functions prefer a "C style" string
+	// 	// Some functions prefer it this way
+	// }
+	// else
+	// {
+	// 	ROS_ERROR("Node %s: unable to retrieve parameter %s.",
+	// 			ros::this_node::getName().c_str(), run_period_name.c_str());
+	// }
 
 	/* ROS topics */
 	// create sub/pub 
@@ -84,8 +87,8 @@ void node_contr::RunPeriodically(float Period)
 		ros::spinOnce(); 
 		// after you completed your little tasks,
 		// execute eventual callbacks that you received in the meanwhile
-		usleep(1000);
-		// LoopRate.sleep();
+		// usleep(1000);
+		LoopRate.sleep();
 		// sleep until the next time slot
 	}
 }

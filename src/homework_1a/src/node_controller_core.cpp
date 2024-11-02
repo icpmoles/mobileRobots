@@ -18,7 +18,7 @@ int main(int argc, char **argv)
 
   node.Prepare();
   
-  node.RunPeriodically(node.RunPeriod);
+  node.RunPeriodically(node.subtick);
    
   node.Shutdown();
   
