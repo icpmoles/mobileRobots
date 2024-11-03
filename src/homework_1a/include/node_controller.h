@@ -43,6 +43,7 @@ class node_contr
     double u_act, uI_prev, y_act, ysp_act;
     double a, b;
     double theta, thetaD;
+    double Kc, Ti, Ts;
     int multiplier;
     
   public:

@@ -47,6 +47,8 @@ class node_sim
     int iteration,loc_iteration;
     int multiplier;
     // double subtick;
+    
+	  double initial_angle, initial_angular_vel;
   
     
     

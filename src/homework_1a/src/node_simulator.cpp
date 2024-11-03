@@ -37,6 +37,10 @@ void node_sim::Prepare(void) // Janitor tasks
 	// Handle.getParam(dt_name, sim_dt);
 	Handle.getParam("/tick_multiplier",multiplier);
 	Handle.getParam("/subtick",subtick);
+	// Handle.getParam(d_name, sim_d);
+	Handle.getParam(ros::this_node::getName()+"/initial_angle",initial_angle);
+	Handle.getParam(ros::this_node::getName()+"/initial_angular_vel",initial_angular_vel);
+
 	sim_dt = subtick*multiplier;
 	// Handle.getParam(FullParamName, RunPeriod)
 	// FullParamName is a path
@@ -68,6 +72,8 @@ void node_sim::Prepare(void) // Janitor tasks
 	// it needs to know the pointer to the node handle
  	sim_publisher = Handle.advertise<std_msgs::Float64>("/simulation_output", 5);
 	time_publisher = Handle.advertise<rosgraph_msgs::Clock>("/clock", 10);
+	
+	Handle.getParam("/equilibrium_angle",initial_angle);
 	// std_msgs::Float64,  type of msg we are advertising
 	// "/topic2", 			topic name
 	// 1: buffer size, like for subscriber
@@ -79,7 +85,7 @@ void node_sim::Prepare(void) // Janitor tasks
     sim_state[0] = 0.0;
     sim_state[1] = 0.0;	
 
-	setInitialState(X10,X20);
+	setInitialState(initial_angle,initial_angle);
 	sim_t = 1.0;
 	iteration = 0;
     
@@ -216,7 +222,7 @@ void node_sim::PeriodicTask(void)
 		sim_publisher.publish(geo_msg);
 	} else {
 		
-		ROS_INFO("clock executed, new Time: + %f = %f",subtick,sim_t);
+		// ROS_INFO("clock executed, new Time: + %f = %f",subtick,sim_t);
 	}
 	iteration++;
 }

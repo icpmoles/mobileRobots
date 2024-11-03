@@ -4,12 +4,15 @@
   /node_simulator/d: 0.3
   /node_simulator/dt: 1.0
   /node_simulator/run_period: 0.1
+  /node_simulator/initial_angle: 3.14
+  /node_simulator/initial_angle: -0.1
 
   /node_controller/ts: 1.0 # controller T sampling = resolution of simulator
-  /node_controller/kd: 0.3
-  /node_controller/ki: 1.0
-  /node_controller/kp: 0.3
+  /node_controller/Kc: 0.3
+  /node_controller/Ti: 1.0
+  # /node_controller/Ts: 0.3
   /node_controller/run_period: 0.1
   
   /subtick: 0.001 #in s
   /tick_multiplier: 10 #integeer
+  /equilibrium_angle: 3.14

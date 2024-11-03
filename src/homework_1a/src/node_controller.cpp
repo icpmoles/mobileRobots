@@ -16,15 +16,22 @@ void node_contr::Prepare(void) // Janitor tasks
 
 	Handle.getParam("/tick_multiplier",multiplier);
 	Handle.getParam("/subtick",subtick);
+
+	Handle.getParam(ros::this_node::getName()+"/Kc",Kc);
+	Handle.getParam(ros::this_node::getName()+"/Ti",Ti);
+	
 	// FullParamName is a path
 	// RunPeriod is where it stores the parameter
-
+	Ts = subtick * multiplier;
+	kp_path = ros::this_node::getName()+"/kp";
+	a = Kc*Ts/Ti;
+    b = Kc;
 	// Initialize 
 	u_act   = 0.0;
     uI_prev = 0.0;
     y_act   = 0.0;
     ysp_act = 0.0;
-
+	Handle.getParam("/equilibrium_angle",ysp_act);
 	// if (true == Handle.getParam(run_period_name, RunPeriod))
 	// {
 	// 	ROS_INFO("Node %s: retrieved parameter %s.",
