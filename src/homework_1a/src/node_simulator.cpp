@@ -73,7 +73,7 @@ void node_sim::Prepare(void) // Janitor tasks
  	sim_publisher = Handle.advertise<std_msgs::Float64>("/simulation_output", 5);
 	time_publisher = Handle.advertise<rosgraph_msgs::Clock>("/clock", 10);
 	
-	Handle.getParam("/equilibrium_angle",initial_angle);
+	// Handle.getParam("/equilibrium_angle",initial_angle);
 	// std_msgs::Float64,  type of msg we are advertising
 	// "/topic2", 			topic name
 	// 1: buffer size, like for subscriber
@@ -85,7 +85,7 @@ void node_sim::Prepare(void) // Janitor tasks
     sim_state[0] = 0.0;
     sim_state[1] = 0.0;	
 
-	setInitialState(initial_angle,initial_angle);
+	setInitialState(initial_angle,initial_angular_vel);
 	sim_t = 1.0;
 	iteration = 0;
     
