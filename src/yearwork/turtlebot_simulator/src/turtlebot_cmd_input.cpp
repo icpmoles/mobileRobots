@@ -11,7 +11,7 @@ int main(int argc, char **argv){
 	ros::NodeHandle n; //create nodeHandle
 
 	ros::Publisher chatter_pub = n.advertise<geometry_msgs::Twist>("tb_cmd", 1);
-	std::string node_name = ros::this_node::getName().c_str();
+	std::string node_name = ros::this_node::getName();
 	float v,omega,period;
 	// Handle.getParam(run_period_name, RunPeriod);
 
@@ -33,7 +33,7 @@ int main(int argc, char **argv){
                 
 			msg.linear.x = v; //ros msg object only has data field
 			msg.angular.z = omega;
-    		ROS_INFO("%s: Publishing test vel_cmd for turtlebot",node_name); //standard ROS logging/debugging message
+    		ROS_INFO("%s: Publishing test vel_cmd for turtlebot",node_name.c_str()); //standard ROS logging/debugging message
 			// we just log the content of our msg
 
     		chatter_pub.publish(msg);
