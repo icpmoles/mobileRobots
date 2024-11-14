@@ -92,6 +92,7 @@ void node_sim::Shutdown(void)
 
 void node_sim::sub_callback(const geometry_msgs::Twist::ConstPtr& msg)
 {
+	ROS_INFO("%s: received velocity/turn comand: %f %f ", node_name.c_str(), msg->linear.x, msg->angular.z);
 	/* Receive data from the topic */
 	simU_v_cmd = msg->linear.x;
 	simU_omega_cmd = msg->angular.z;
@@ -99,19 +100,28 @@ void node_sim::sub_callback(const geometry_msgs::Twist::ConstPtr& msg)
 
 void node_sim::PeriodicTask(void)
 {
+	//elaboarate simulation values for more descriptive names
+	simY_x = sim_state[0];
+	simY_y = sim_state[1]; 
+	simY_theta = sim_state[2];
+	simY_v = sim_state[3];
+	simY_omega = sim_state[4];
+
+
+
 	rosgraph_msgs::Clock clockMsg;
 	clockMsg.clock = ros::Time(sim_t);
 	time_publisher.publish(clockMsg);
 
 	geometry_msgs::Pose poseMsg;
-	poseMsg.position.x = simX_x;
-	poseMsg.position.y = simX_y;
-	poseMsg.orientation.z = simX_theta;
+	poseMsg.position.x = simY_x;
+	poseMsg.position.y = simY_y;
+	poseMsg.orientation.z = simY_theta;
 	simPose_publisher.publish(poseMsg);
 
 	geometry_msgs::Twist twistMsg;
-	twistMsg.linear.x = simX_v;
-	twistMsg.angular.z = simX_omega;
+	twistMsg.linear.x = simY_v;
+	twistMsg.angular.z = simY_omega;
 	simVel_publisher.publish(twistMsg);
 
 	
@@ -128,16 +138,16 @@ void node_sim::Simulator_Step(void)
 void node_sim::simulator_ode(const state_type &state, state_type &dstate, double t)
 {
     // Actual state
-    const double x = state[0]; 
-    const double y = state[1]; 
-	const double theta = state[2]; 
-    const double v = state[3]; 
-	const double omega = state[4]; 
+    const double sx = state[0]; 
+    const double sy = state[1]; 
+	const double stheta = state[2]; 
+    const double sv = state[3]; 
+	const double somega = state[4]; 
 
     // Model equations of a unicycle with dynamics
-    dstate[0] = cos(theta)*v;
-    dstate[1] = sin(theta)*v;
-	dstate[2] = omega;
-	dstate[3] = (simU_v_cmd-v)/Ta;
-	dstate[4] = (simU_omega_cmd-omega)/Ta;
+    dstate[0] = cos(stheta)*sv;
+    dstate[1] = sin(stheta)*sv;
+	dstate[2] = somega;
+	dstate[3] = (simU_v_cmd-sv)/Ta;
+	dstate[4] = (simU_omega_cmd-somega)/Ta;
 }

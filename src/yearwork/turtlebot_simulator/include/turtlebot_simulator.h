@@ -42,7 +42,7 @@ class node_sim
     // SIMULATOR ZONE
     /* Node state variables */
     double simU_v_cmd, simU_omega_cmd;
-    double simX_x, simX_y, simX_theta, simX_v, simX_omega;
+    // double simX_x, simX_y, simX_theta, simX_v, simX_omega;
     double simY_x, simY_y, simY_theta, simY_v, simY_omega;
     double sim_t, sim_dt;
     double Ta; //Time constant robot
