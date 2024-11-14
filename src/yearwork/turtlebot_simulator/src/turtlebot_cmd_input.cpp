@@ -12,10 +12,10 @@ int main(int argc, char **argv){
 
 	ros::Publisher chatter_pub = n.advertise<geometry_msgs::Twist>("tb_cmd", 1);
 	std::string node_name = ros::this_node::getName();
-	float v,omega,period;
+	float v,omega,period,v_par;
 	// Handle.getParam(run_period_name, RunPeriod);
 
-	n.getParam(node_name+"/v",v);
+	n.getParam(node_name+"/v",v_par);
 	n.getParam(node_name+"/omega",omega);
 	n.getParam(node_name+"/period",period);
 
@@ -27,6 +27,14 @@ int main(int argc, char **argv){
 	int count = 0;
 
   	while (ros::ok()){ //standard ros loop, check if ROS is working, exit otherwise
+			
+
+			// switches velocity back and forth
+			if (v==0.0){
+				v = v_par;
+			} else {
+				v = 0.0;
+			}
 
 	    	geometry_msgs::Twist msg; 
 
@@ -45,6 +53,8 @@ int main(int argc, char **argv){
 
     		loop_rate.sleep(); //just waits until the next 10Hz loop, better this way 
 			// instead of the built in sleep
+			
+
 			
   	}
 

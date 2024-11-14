@@ -3,14 +3,15 @@
 #include <boost/numeric/odeint.hpp>
 
 typedef std::vector<double> state_type;
-#include "ros/ros.h"
+
 #define RUN_PERIOD_DEFAULT 0.1
 /* Used only if the actual value of the period is not retrieved from the ROS parameter server */
 #define NAME_OF_THIS_NODE "node_example"
-#include "std_msgs/Float64.h"
+#include "ros/ros.h"
 #include "geometry_msgs/Pose.h"
 #include "geometry_msgs/Twist.h"
 #include "rosgraph_msgs/Clock.h"
+
 // i want to send float64 msgs between the example nodes
 class node_sim
 {
@@ -22,34 +23,36 @@ class node_sim
     
     /* ROS topics */
     ros::Subscriber sim_subscriber;
-    ros::Publisher sim_publisher;
+    ros::Publisher simPose_publisher;
+    ros::Publisher simVel_publisher;
     ros::Publisher time_publisher;
     /* Parameters from ROS parameter server */
     // param_type ParamVar;
     // where to store the parameters retrieved by the param server
 
     /* ROS topic callbacks */
-    void sub_callback(const std_msgs::Float64::ConstPtr& msg);
+    void sub_callback(const geometry_msgs::Twist::ConstPtr& msg);
  
     /* Node periodic task */
     void PeriodicTask(void);
     
-    void Simulator_Step(bool multi);
+    void Simulator_Step(void);
     
-
+    std::string node_name;
     // SIMULATOR ZONE
     /* Node state variables */
-    double sim_u,sim_y1,sim_y2;
+    double simU_v_cmd, simU_omega_cmd;
+    double simX_x, simX_y, simX_theta, simX_v, simX_omega;
+    double simY_x, simY_y, simY_theta, simY_v, simY_omega;
     double sim_t, sim_dt;
-    double sim_m, sim_l, sim_d;
+    double Ta; //Time constant robot
+
+    double Ts; // sample time
+    int freq_multiplier;
     state_type sim_state;
     boost::numeric::odeint::runge_kutta_dopri5 < state_type > stepper;
     void simulator_ode(const state_type &sim_state, state_type &sim_dstate, double t);
-    int iteration,loc_iteration;
-    int multiplier;
-    // double subtick;
-    
-	  double initial_angle, initial_angular_vel;
+  
   
     
     
@@ -58,16 +61,15 @@ class node_sim
   
     // we want to use it to pass it to the RunPeriodically in the _core.cpp
     // we make it public
-    void setInitialState(double x1, double x2);
-    void setModelParams(double m, double l, double d);
-        // mass, length, friction coefficent 
+    void setInitialState(double x, double y,double theta, double v, double omega);
+    void setModelParams(double Ta);
 
     // void integrate();
     // void setInputValues(double u);
   
-    void getState(double &x1, double &x2);
-    void getTime(double &time); //get time after integration step
-
+    // void getPose(double &x, double &y, double &theta);
+    // void getTime(double &time); //get time after integration step
+    // void getVel(double &v, double &omega);
 
     // functions stubs
     void Prepare(void);

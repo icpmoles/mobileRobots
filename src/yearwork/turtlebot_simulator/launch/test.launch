@@ -1,8 +1,8 @@
 <launch>
   <!-- load parameter file -->
   <rosparam file="$(find turtlebot_simulator)/config/simulator_params.yaml" command="load"/>
-  <rosparam param="/use_sim_time">true</rosparam>
+  <!-- <rosparam param="/use_sim_time">true</rosparam> -->
   
-  <node pkg="turtlebot_simulator" type="turtlebot_simulator_node" name="tb_simulator" output="screen" />
-  <node pkg="turtlebot_simulator" type="turtlebot_cmd_input" name="tb_test"/>
+  <!-- <node pkg="turtlebot_simulator" type="turtlebot_simulator_node" name="tb_simulator" output="screen" /> -->
+  <node pkg="turtlebot_simulator" type="turtlebot_cmd_input" name="tb_test" output="screen"/>
 </launch>

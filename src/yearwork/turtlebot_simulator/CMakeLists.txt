@@ -134,10 +134,15 @@ include
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-add_executable( turtlebot_simulator_node src/node_simulator.cpp src/turtlebot_simulator_node.cpp)
-target_link_libraries(turtlebot_simulator_node ${catkin_LIBRARIES})
+add_executable(turtlebot_simulator_node 
+src/turtlebot_simulator.cpp 
+src/turtlebot_simulator_core.cpp)
+target_link_libraries(
+  turtlebot_simulator_node ${catkin_LIBRARIES}
+  )
 
-add_executable( turtlebot_cmd_input src/turtlebot_cmd_input.cpp)
+add_executable( turtlebot_cmd_input 
+src/turtlebot_cmd_input.cpp)
 target_link_libraries(turtlebot_cmd_input ${catkin_LIBRARIES})
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the

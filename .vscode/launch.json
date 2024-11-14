@@ -16,10 +16,10 @@
             "preLaunchTask": "make_debug"
         },
         {
-            "name": "ROS: Launch SP ST",
+            "name": "ROS: Launch TurtleBot Sim",
             "type": "ros",
             "request": "launch",
-            "target": "${workspaceFolder}/src/second_project/launch/task2_amcl.launch",
+            "target": "${workspaceFolder}/src/yearwork/turtlebot_simulator/launch/simulator.launch",
             "preLaunchTask": "make_debug"
         },
         {
