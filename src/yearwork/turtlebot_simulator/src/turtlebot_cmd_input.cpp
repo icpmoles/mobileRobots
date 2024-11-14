@@ -41,7 +41,7 @@ int main(int argc, char **argv){
                 
 			msg.linear.x = v; //ros msg object only has data field
 			msg.angular.z = omega;
-    		ROS_INFO("%s: Publishing test vel_cmd for turtlebot: %f %f",node_name.c_str(),v,omega); //standard ROS logging/debugging message
+    		// ROS_INFO("%s: Publishing test vel_cmd for turtlebot: %f %f",node_name.c_str(),v,omega); //standard ROS logging/debugging message
 			// we just log the content of our msg
 
     		chatter_pub.publish(msg);
