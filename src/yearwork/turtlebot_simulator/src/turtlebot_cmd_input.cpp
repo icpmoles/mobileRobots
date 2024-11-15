@@ -25,17 +25,14 @@ int main(int argc, char **argv){
 	// running frequency of the loop at 10Hz
 
 	int count = 0;
+	float stress_period = 1.5;
 
   	while (ros::ok()){ //standard ros loop, check if ROS is working, exit otherwise
 			
 
 			// switches velocity back and forth
-			if (v==0.0){
-				v = v_par;
-			} else {
-				v = 0.0;
-			}
-
+			v = v_par * std::ceil(std::sin(3.14 * ros::Time::now().toSec() / (stress_period) ));
+			omega = v_par * std::ceil(-std::sin(3.14 * ros::Time::now().toSec() / (stress_period) ));
 	    	geometry_msgs::Twist msg; 
 
                 

@@ -5,4 +5,5 @@
   
   <node pkg="turtlebot_simulator" type="turtlebot_simulator_node" name="tb_simulator" output="screen" />
   <node pkg="turtlebot_simulator" type="turtlebot_cmd_input" name="tb_test" output="screen"/>
+
 </launch>

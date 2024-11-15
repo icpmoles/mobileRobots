@@ -1,26 +1,40 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <root>
  <tabbed_widget parent="main_window" name="Main Window">
-  <Tab containers="1" tab_name="tab1">
+  <Tab containers="1" tab_name="speeds">
    <Container>
-    <DockSplitter count="1" orientation="-" sizes="1">
-     <DockSplitter count="2" orientation="|" sizes="0.5;0.5">
-      <DockArea name="...">
-       <plot style="Lines" flip_y="false" flip_x="false" mode="TimeSeries">
-        <range left="0.000000" bottom="-0.100000" right="170.911000" top="0.100000"/>
-        <limitY/>
-        <curve name="/tp_vel/angular/z" color="#1f77b4"/>
-        <curve name="/tp_vel/linear/x" color="#d62728"/>
+    <DockSplitter count="1" sizes="1" orientation="-">
+     <DockSplitter count="2" sizes="0.5;0.5" orientation="|">
+      <DockArea name="tb speeds">
+       <plot style="Lines" flip_x="false" mode="TimeSeries" flip_y="false">
+        <range top="0.600000" left="75.935000" right="86.022000" bottom="-0.100000"/>
+        <limitY max="0.6" min="-0.1"/>
+        <curve color="#1f77b4" name="/tb_vel/linear/x"/>
+        <curve color="#d62728" name="/tb_vel/angular/z"/>
        </plot>
       </DockArea>
-      <DockArea name="...">
-       <plot style="Lines" flip_y="false" flip_x="false" mode="XYPlot">
-        <range left="0.000000" bottom="-0.100000" right="170.911000" top="0.100000"/>
-        <limitY/>
-        <curve name="/realPosition" curve_x="/tp_pose/position/x" color="#17becf" curve_y="/tp_pose/position/y"/>
+      <DockArea name="speeds cmd">
+       <plot style="Lines" flip_x="false" mode="TimeSeries" flip_y="false">
+        <range top="0.600000" left="75.935000" right="86.022000" bottom="-0.100000"/>
+        <limitY max="0.6" min="-0.1"/>
+        <curve color="#27c7d6" name="/tb_cmd/linear/x"/>
+        <curve color="#c9401a" name="/tb_cmd/angular/z"/>
        </plot>
       </DockArea>
      </DockSplitter>
+    </DockSplitter>
+   </Container>
+  </Tab>
+  <Tab containers="1" tab_name="XY Plot">
+   <Container>
+    <DockSplitter count="1" sizes="1" orientation="-">
+     <DockArea name="...">
+      <plot style="Lines" flip_x="false" mode="XYPlot" flip_y="false">
+       <range top="4.246547" left="-0.270034" right="4.768140" bottom="1.710952"/>
+       <limitY/>
+       <curve curve_x="/tb_pose/position/x" color="#9467bd" name="/tb_pose/position/[x;y]" curve_y="/tb_pose/position/y"/>
+      </plot>
+     </DockArea>
     </DockSplitter>
    </Container>
   </Tab>
@@ -31,7 +45,7 @@
  <!-- - - - - - - - - - - - - - - -->
  <Plugins>
   <plugin ID="DataLoad CSV">
-   <parameters delimiter="0" time_axis=""/>
+   <parameters time_axis="" delimiter="0"/>
   </plugin>
   <plugin ID="DataLoad MCAP"/>
   <plugin ID="DataLoad ROS bags">
@@ -49,7 +63,7 @@
    <max_array_size value="100"/>
    <boolean_strings_to_number value="true"/>
    <remove_suffix_from_strings value="true"/>
-   <selected_topics value="/clock;/tp_pose;/tp_vel"/>
+   <selected_topics value="/clock;/tb_cmd;/tb_pose;/tb_vel"/>
   </plugin>
   <plugin ID="UDP Server"/>
   <plugin ID="WebSocket Server"/>
@@ -66,6 +80,7 @@
  </Plugins>
  <!-- - - - - - - - - - - - - - - -->
  <previouslyLoaded_Datafiles/>
+ <previouslyLoaded_Streamer name="ROS Topic Subscriber"/>
  <!-- - - - - - - - - - - - - - - -->
  <customMathEquations/>
  <snippets/>

@@ -31,8 +31,8 @@ void node_sim::Prepare(void)
 	Handle.getParam(node_name+"/omega0", init_omega);
 
 	sim_subscriber = Handle.subscribe("/tb_cmd", 3, &node_sim::sub_callback, this);
- 	simPose_publisher = Handle.advertise<geometry_msgs::Pose>("/tp_pose", 5);
-	simVel_publisher = Handle.advertise<geometry_msgs::Twist>("/tp_vel", 5);
+ 	simPose_publisher = Handle.advertise<geometry_msgs::Pose>("/tb_pose", 5);
+	simVel_publisher = Handle.advertise<geometry_msgs::Twist>("/tb_vel", 5);
 	time_publisher = Handle.advertise<rosgraph_msgs::Clock>("/clock", 10);
 
 	
@@ -72,6 +72,8 @@ void node_sim::setInitialState(double x, double y,double theta, double v, double
 
 void node_sim::RunPeriodically(float Period)
 {	
+	
+	// ros::Rate  LoopRate(1.0/Period);
 	ros::WallRate  LoopRate(1.0/Period);
 	ROS_INFO("%s: running periodically (T=%.2fs, f=%.2fHz).", node_name.c_str(), Period, 1.0/Period);
 	while (ros::ok()) 
@@ -92,7 +94,7 @@ void node_sim::Shutdown(void)
 
 void node_sim::sub_callback(const geometry_msgs::Twist::ConstPtr& msg)
 {
-	// ROS_INFO("%s: received velocity/turn comand: %f %f ", node_name.c_str(), msg->linear.x, msg->angular.z);
+	ROS_INFO("%s: received velocity/turn comand: %f %f ", node_name.c_str(), msg->linear.x, msg->angular.z);
 	/* Receive data from the topic */
 	simU_v_cmd = msg->linear.x;
 	simU_omega_cmd = msg->angular.z;
