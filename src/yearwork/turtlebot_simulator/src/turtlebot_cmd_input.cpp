@@ -12,11 +12,11 @@ int main(int argc, char **argv){
 
 	ros::Publisher chatter_pub = n.advertise<geometry_msgs::Twist>("tb_cmd", 1);
 	std::string node_name = ros::this_node::getName();
-	float v,omega,scan_period,v_par,wave_period;
+	float v,omega,scan_period,v_par,omega_par,wave_period,c_t;
 	// Handle.getParam(run_period_name, RunPeriod);
 
 	n.getParam(node_name+"/v",v_par);
-	n.getParam(node_name+"/omega",omega);
+	n.getParam(node_name+"/omega",omega_par);
 	n.getParam(node_name+"/scan_period",scan_period);
 	n.getParam(node_name+"/wave_period",wave_period);
 
@@ -29,10 +29,19 @@ int main(int argc, char **argv){
 
   	while (ros::ok()){ //standard ros loop, check if ROS is working, exit otherwise
 			
-
+			c_t = fmod(ros::Time::now().toSec() ,wave_period);
 			// switches velocity back and forth
-			v = v_par * std::ceil(std::sin(3.14 * ros::Time::now().toSec() / (wave_period) ));
-			omega = - v_par * std::ceil(-std::sin(3.14 * ros::Time::now().toSec() / (wave_period) ));
+			// v = v_par * std::ceil(std::sin(3.14 * ros::Time::now().toSec() / (wave_period) ));
+
+			v= v_par;
+			// omega = - omega_par * (0.5- std::ceil(-std::sin(3.14 * ros::Time::now().toSec() / (wave_period) )));
+
+			if (c_t>10.0 && c_t<14.0){
+				omega = omega_par;
+			} else {
+				omega = 0;
+			}
+
 	    	geometry_msgs::Twist msg; 
 
                 

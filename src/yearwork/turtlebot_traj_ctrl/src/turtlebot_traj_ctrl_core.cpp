@@ -1,5 +1,5 @@
 // it contains the main...., just copy paste and modify if needed
-#include "node_controller.h"
+#include "turtlebot_traj_ctrl.h"
 
 int main(int argc, char **argv)
 {

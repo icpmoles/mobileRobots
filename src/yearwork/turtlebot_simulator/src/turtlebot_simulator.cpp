@@ -23,6 +23,7 @@ void node_sim::Prepare(void)
 	Handle.getParam(node_name+"/Ta", Ta);
 	Handle.getParam(node_name+"/Ts", Ts);
 	Handle.getParam(node_name+"/freq_multiplier", freq_multiplier);
+	Handle.getParam(node_name+"/endTime", endTime);
 
 	Handle.getParam(node_name+"/x0", init_x);
 	Handle.getParam(node_name+"/y0", init_y);
@@ -88,6 +89,7 @@ void node_sim::RunPeriodically(float Period)
 void node_sim::Shutdown(void)
 {
 	ROS_INFO("%s: shutting down.", node_name.c_str());
+	ros::shutdown();
 
 }
 
@@ -102,6 +104,9 @@ void node_sim::sub_callback(const geometry_msgs::Twist::ConstPtr& msg)
 
 void node_sim::PeriodicTask(void)
 {
+	if (ros::Time::now().toSec()>endTime){
+		Shutdown();
+	}
 	//elaboarate simulation values for more descriptive names
 	simY_x = sim_state[0];
 	simY_y = sim_state[1]; 

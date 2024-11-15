@@ -49,6 +49,7 @@ class node_sim
 
     double Ts; // sample time
     int freq_multiplier;
+    double endTime; //simulation running time
     state_type sim_state;
     boost::numeric::odeint::runge_kutta_dopri5 < state_type > stepper;
     void simulator_ode(const state_type &sim_state, state_type &sim_dstate, double t);

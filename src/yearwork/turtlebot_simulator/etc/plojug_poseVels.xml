@@ -3,22 +3,22 @@
  <tabbed_widget name="Main Window" parent="main_window">
   <Tab containers="1" tab_name="speeds">
    <Container>
-    <DockSplitter orientation="-" sizes="1" count="1">
-     <DockSplitter orientation="|" sizes="0.5;0.5" count="2">
+    <DockSplitter orientation="-" count="1" sizes="1">
+     <DockSplitter orientation="|" count="2" sizes="0.5;0.5">
       <DockArea name="tb speeds">
-       <plot flip_y="false" mode="TimeSeries" flip_x="false" style="Lines">
-        <range right="106.978000" bottom="-1.000000" top="1.000000" left="96.925000"/>
-        <limitY min="-1" max="1"/>
-        <curve name="/tb_vel/linear/x" color="#1f77b4"/>
-        <curve name="/tb_vel/angular/z" color="#d62728"/>
+       <plot mode="TimeSeries" style="Lines" flip_x="false" flip_y="false">
+        <range left="10.072000" bottom="-1.000000" top="2.000000" right="28.000000"/>
+        <limitY min="-1" max="2"/>
+        <curve name="/tb_vel/angular/z" color="#1ac938"/>
+        <curve name="/tb_vel/linear/x" color="#ff7f0e"/>
        </plot>
       </DockArea>
       <DockArea name="speeds cmd">
-       <plot flip_y="false" mode="TimeSeries" flip_x="false" style="Dots">
-        <range right="106.978000" bottom="-1.000000" top="1.000000" left="96.925000"/>
-        <limitY min="-1" max="1"/>
-        <curve name="/tb_cmd/linear/x" color="#27c7d6"/>
-        <curve name="/tb_cmd/angular/z" color="#c9401a"/>
+       <plot mode="TimeSeries" style="Dots" flip_x="false" flip_y="false">
+        <range left="10.072000" bottom="-1.000000" top="2.000000" right="28.000000"/>
+        <limitY min="-1" max="2"/>
+        <curve name="/tb_cmd/angular/z" color="#1f77b4"/>
+        <curve name="/tb_cmd/linear/x" color="#d62728"/>
        </plot>
       </DockArea>
      </DockSplitter>
@@ -27,18 +27,18 @@
   </Tab>
   <Tab containers="1" tab_name="XY Plot">
    <Container>
-    <DockSplitter orientation="-" sizes="1" count="1">
+    <DockSplitter orientation="-" count="1" sizes="1">
      <DockArea name="...">
-      <plot flip_y="false" mode="XYPlot" flip_x="false" style="Lines">
-       <range right="1.371291" bottom="-0.849701" top="0.160855" left="-0.630083"/>
+      <plot mode="XYPlot" style="Lines" flip_x="false" flip_y="false">
+       <range left="-0.361813" bottom="-0.978869" top="0.211369" right="1.995294"/>
        <limitY/>
-       <curve curve_x="/tb_pose/position/x" name="/tb_pose/position/[x;y]" curve_y="/tb_pose/position/y" color="#9467bd"/>
+       <curve name="/tb_pose/position/[x;y]" color="#f14cc1" curve_x="/tb_pose/position/x" curve_y="/tb_pose/position/y"/>
       </plot>
      </DockArea>
     </DockSplitter>
    </Container>
   </Tab>
-  <currentTabIndex index="0"/>
+  <currentTabIndex index="1"/>
  </tabbed_widget>
  <use_relative_time_offset enabled="0"/>
  <!-- - - - - - - - - - - - - - - -->

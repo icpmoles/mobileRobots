@@ -5,6 +5,6 @@
   <node name="plotjuggler_with_layout" 
           pkg="plotjuggler"
           type="plotjuggler"
-          args="--layout $(find turtlebot_simulator)/etc/plojug_poseVels.xml --buffer_size 10 --nosplash"
+          args="--layout $(find turtlebot_simulator)/etc/plojug_poseVels.xml --buffer_size 40 --nosplash"
     />
 </launch>
