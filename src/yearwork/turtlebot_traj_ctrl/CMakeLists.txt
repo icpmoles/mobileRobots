@@ -140,8 +140,8 @@ include_directories(
 
 
 
-# add_executable( tb_ctrl_node src/turtlebot_traj_ctrl_node.cpp)
-# target_link_libraries(tb_ctrl_node ${catkin_LIBRARIES})
+add_executable( tb_ctrl_node src/turtlebot_traj_ctrl.cpp src/turtlebot_traj_ctrl_core.cpp)
+target_link_libraries(tb_ctrl_node ${catkin_LIBRARIES})
 
 
 
