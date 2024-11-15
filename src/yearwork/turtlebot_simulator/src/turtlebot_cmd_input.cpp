@@ -12,27 +12,27 @@ int main(int argc, char **argv){
 
 	ros::Publisher chatter_pub = n.advertise<geometry_msgs::Twist>("tb_cmd", 1);
 	std::string node_name = ros::this_node::getName();
-	float v,omega,period,v_par;
+	float v,omega,scan_period,v_par,wave_period;
 	// Handle.getParam(run_period_name, RunPeriod);
 
 	n.getParam(node_name+"/v",v_par);
 	n.getParam(node_name+"/omega",omega);
-	n.getParam(node_name+"/period",period);
+	n.getParam(node_name+"/scan_period",scan_period);
+	n.getParam(node_name+"/wave_period",wave_period);
 
 	//create publisher object with node.advertise with a type string and name "chatter" and 1 as size of the buffer of the publisher (1 is good most of the time)(can be increased in case your calculations take too much time)
 
-	ros::Rate loop_rate(1.0/period);
+	ros::Rate loop_rate(1.0/scan_period);
 	// running frequency of the loop at 10Hz
 
 	int count = 0;
-	float stress_period = 1.5;
 
   	while (ros::ok()){ //standard ros loop, check if ROS is working, exit otherwise
 			
 
 			// switches velocity back and forth
-			v = v_par * std::ceil(std::sin(3.14 * ros::Time::now().toSec() / (stress_period) ));
-			omega = v_par * std::ceil(-std::sin(3.14 * ros::Time::now().toSec() / (stress_period) ));
+			v = v_par * std::ceil(std::sin(3.14 * ros::Time::now().toSec() / (wave_period) ));
+			omega = - v_par * std::ceil(-std::sin(3.14 * ros::Time::now().toSec() / (wave_period) ));
 	    	geometry_msgs::Twist msg; 
 
                 

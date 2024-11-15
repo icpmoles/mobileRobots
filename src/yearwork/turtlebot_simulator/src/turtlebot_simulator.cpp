@@ -94,7 +94,7 @@ void node_sim::Shutdown(void)
 
 void node_sim::sub_callback(const geometry_msgs::Twist::ConstPtr& msg)
 {
-	ROS_INFO("%s: received velocity/turn comand: %f %f ", node_name.c_str(), msg->linear.x, msg->angular.z);
+	// ROS_INFO("%s: received velocity/turn comand: %f %f ", node_name.c_str(), msg->linear.x, msg->angular.z);
 	/* Receive data from the topic */
 	simU_v_cmd = msg->linear.x;
 	simU_omega_cmd = msg->angular.z;
