@@ -1,0 +1,10 @@
+<launch>
+  <!-- load parameter file -->
+  <rosparam file="$(find homework_2)/config/simulator_params.yaml" command="load"/>
+  <rosparam param="/use_sim_time">true</rosparam>
+  <node name="plotjuggler_with_layout" 
+          pkg="plotjuggler"
+          type="plotjuggler"
+          args="--layout $(find turtlebot_simulator)/etc/plojug_poseVels.xml --buffer_size 40 --nosplash"
+    />
+</launch>

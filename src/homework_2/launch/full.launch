@@ -1,0 +1,9 @@
+<launch>
+  <!-- load parameter file -->
+  <rosparam file="$(find homework_2)/config/simulator_params.yaml" command="load"/>
+  <rosparam param="/use_sim_time">true</rosparam>
+  
+  <node pkg="homework_2" type="homework_2_simulator" name="homework_2_simulator" output="screen" />
+  <node pkg="homework_2" type="homework_2_controller" name="tb_test" output="screen"/>
+
+</launch>
