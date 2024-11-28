@@ -1,0 +1,258 @@
+#include "ros/ros.h"
+#include "geometry_msgs/Pose.h"
+#include "geometry_msgs/Twist.h"
+#include "rosgraph_msgs/Clock.h"
+#include <boost/numeric/odeint.hpp>
+
+typedef std::vector<double> state_type;
+
+#define RUN_PERIOD_DEFAULT 0.1
+/* Used only if the actual value of the period is not retrieved from the ROS parameter server */
+#define NAME_OF_THIS_NODE "node_example"
+#define DT 0.15/10 //temporary, in case it will be changed by launch parameters 
+#define X10 0.0
+#define X20 0.0
+#define X30 0.0
+#define X40 0.0
+#define X50 0.0
+#define TA  0.15
+
+// i want to send float64 msgs between the example nodes
+class node_sim
+{
+  private: 
+    ros::NodeHandle Handle; //ROS Handle
+    // initialized at ros::init
+    // needs to be used if you call a function of the 
+    // ROS client library
+    
+    /* ROS topics */
+    ros::Subscriber sim_subscriber;
+    ros::Publisher simPose_publisher;
+    ros::Publisher simVel_publisher;
+    ros::Publisher time_publisher;
+    /* Parameters from ROS parameter server */
+    // param_type ParamVar;
+    // where to store the parameters retrieved by the param server
+
+    /* ROS topic callbacks */
+    void sub_callback(const geometry_msgs::Twist::ConstPtr& msg);
+ 
+    /* Node periodic task */
+    void PeriodicTask(void);
+    
+    void Simulator_Step(void);
+    
+    std::string node_name;
+    // SIMULATOR ZONE
+    /* Node state variables */
+    double simU_v_cmd, simU_omega_cmd;
+    // double simX_x, simX_y, simX_theta, simX_v, simX_omega;
+    double simY_x, simY_y, simY_theta, simY_v, simY_omega;
+    double sim_t, sim_dt;
+    double Ta; //Time constant robot
+
+    double Ts; // sample time
+    int freq_multiplier;
+    double endTime; //simulation running time
+    state_type sim_state;
+    boost::numeric::odeint::runge_kutta_dopri5 < state_type > stepper;
+    void simulator_ode(const state_type &sim_state, state_type &sim_dstate, double t);
+  
+  
+    
+    
+  public:
+    double subtick; 
+  
+    // we want to use it to pass it to the RunPeriodically in the _core.cpp
+    // we make it public
+    void setInitialState(double x, double y,double theta, double v, double omega);
+    void setModelParams(double Ta);
+
+    // void integrate();
+    // void setInputValues(double u);
+  
+    // void getPose(double &x, double &y, double &theta);
+    // void getTime(double &time); //get time after integration step
+    // void getVel(double &v, double &omega);
+
+    // functions stubs
+    void Prepare(void);
+    
+
+    // runs the periodic loop inside
+    // which then calls the PeriodicTask callback
+    void RunPeriodically(float Period);
+    
+    void Shutdown(void);
+};
+
+
+
+
+
+
+void node_sim::Prepare(void)
+{
+
+	
+	// double Ta;  		 // turtlebot time constant
+	double Ts = DT;		 // sampling time
+	double init_x,init_y,init_theta,init_v,init_omega;  // state initialization parameters
+
+	this->node_name  = ros::this_node::getName();
+	
+	Handle.getParam(node_name+"/Ta", Ta);
+	Handle.getParam(node_name+"/Ts", Ts);
+	Handle.getParam(node_name+"/freq_multiplier", freq_multiplier);
+	Handle.getParam(node_name+"/endTime", endTime);
+
+	Handle.getParam(node_name+"/x0", init_x);
+	Handle.getParam(node_name+"/y0", init_y);
+	Handle.getParam(node_name+"/theta0", init_theta);
+	Handle.getParam(node_name+"/v0", init_v);
+	Handle.getParam(node_name+"/omega0", init_omega);
+
+	sim_subscriber = Handle.subscribe("/tb_cmd", 3, &node_sim::sub_callback, this);
+ 	simPose_publisher = Handle.advertise<geometry_msgs::Pose>("/tb_pose", 5);
+	simVel_publisher = Handle.advertise<geometry_msgs::Twist>("/tb_vel", 5);
+	time_publisher = Handle.advertise<rosgraph_msgs::Clock>("/clock", 10);
+
+	
+
+	setInitialState(init_x,init_y,init_theta,init_v,init_omega);
+	
+	
+    
+
+	/* Node variable initialization */
+	// default value if they haven't been received already
+	sim_t = 0.0;
+	simU_v_cmd = 0.0;  
+	simU_omega_cmd = 0.0;
+	subtick = Ts/freq_multiplier;
+		// // time pub
+	rosgraph_msgs::Clock clockMsg;
+	// what's the new time after running the simulation?
+
+	clockMsg.clock = ros::Time(sim_t);
+	// broadcasts first clock msg
+	time_publisher.publish(clockMsg);
+ 	
+	ROS_INFO("%s: Simulator Node ready to run.", node_name.c_str());
+	
+}
+
+void node_sim::setInitialState(double x, double y,double theta, double v, double omega){
+	sim_state.resize(5); // specify size of state
+    sim_state[0] = x;
+    sim_state[1] = y;	
+	sim_state[2] = theta;	
+	sim_state[3] = v;	
+	sim_state[4] = omega;	
+	ROS_INFO("%s: state init to:  %fm  %fm %frad\n%fm/s %frad/s",node_name.c_str(),x,y,theta,v,omega);
+}
+
+void node_sim::RunPeriodically(float Period)
+{	
+	
+	// ros::Rate  LoopRate(1.0/Period);
+	ros::WallRate  LoopRate(1.0/Period);
+	ROS_INFO("%s: running periodically (T=%.2fs, f=%.2fHz).", node_name.c_str(), Period, 1.0/Period);
+	while (ros::ok()) 
+	{
+		ros::spinOnce(); 
+		PeriodicTask(); 
+		LoopRate.sleep();
+	}
+}
+
+
+void node_sim::Shutdown(void)
+{
+	ROS_INFO("%s: shutting down.", node_name.c_str());
+	ros::shutdown();
+
+}
+
+
+void node_sim::sub_callback(const geometry_msgs::Twist::ConstPtr& msg)
+{
+	// ROS_INFO("%s: received velocity/turn comand: %f %f ", node_name.c_str(), msg->linear.x, msg->angular.z);
+	/* Receive data from the topic */
+	simU_v_cmd = msg->linear.x;
+	simU_omega_cmd = msg->angular.z;
+}
+
+void node_sim::PeriodicTask(void)
+{
+	if (ros::Time::now().toSec()>endTime){
+		Shutdown();
+	}
+	//elaboarate simulation values for more descriptive names
+	simY_x = sim_state[0];
+	simY_y = sim_state[1]; 
+	simY_theta = sim_state[2];
+	simY_v = sim_state[3];
+	simY_omega = sim_state[4];
+
+
+
+	rosgraph_msgs::Clock clockMsg;
+	clockMsg.clock = ros::Time(sim_t);
+	time_publisher.publish(clockMsg);
+
+	geometry_msgs::Pose poseMsg;
+	poseMsg.position.x = simY_x;
+	poseMsg.position.y = simY_y;
+	poseMsg.orientation.z = simY_theta;
+	simPose_publisher.publish(poseMsg);
+
+	geometry_msgs::Twist twistMsg;
+	twistMsg.linear.x = simY_v;
+	twistMsg.angular.z = simY_omega;
+	simVel_publisher.publish(twistMsg);
+
+	
+	Simulator_Step();
+	sim_t += subtick;
+	
+}
+
+void node_sim::Simulator_Step(void)
+{
+	stepper.do_step(std::bind(&node_sim::simulator_ode, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3), sim_state, sim_t, subtick);
+}
+
+void node_sim::simulator_ode(const state_type &state, state_type &dstate, double t)
+{
+    // Actual state
+    const double sx = state[0]; 
+    const double sy = state[1]; 
+	const double stheta = state[2]; 
+    const double sv = state[3]; 
+	const double somega = state[4]; 
+
+    // Model equations of a unicycle with dynamics
+    dstate[0] = cos(stheta)*sv;
+    dstate[1] = sin(stheta)*sv;
+	dstate[2] = somega;
+	dstate[3] = (simU_v_cmd-sv)/Ta;
+	dstate[4] = (simU_omega_cmd-somega)/Ta;
+}
+
+
+int main(int argc, char **argv)
+{
+  ros::init(argc, argv, NAME_OF_THIS_NODE); 
+  node_sim node;
+
+  node.Prepare();
+  
+  node.RunPeriodically(node.subtick);
+   
+  node.Shutdown();
+  
+  return (0);
+}
