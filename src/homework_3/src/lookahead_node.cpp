@@ -26,13 +26,14 @@ class node
     // where to store the parameters retrieved by the param server
 
     /* ROS topic callbacks */
-    void topic1_MessageCallback(const std_msgs::Float64MultiArray::ConstPtr& msg);
+    // void topic1_MessageCallback(const std_msgs::Float64MultiArray::ConstPtr& msg);
     void tb_MessageCallback(const std_msgs::Float64MultiArray::ConstPtr& msg);
     /* Node periodic task */
-    void PeriodicTask(void);
+    // void PeriodicTask(void);
     
     /* Node state variables */
     double xp_dot,yp_dot,theta,xr,yr;
+    double R,T;
     std::string node_name;
   
     
@@ -66,6 +67,9 @@ void node::Prepare(void) // Janitor tasks
 
     Handle.getParam(node_name+"/xr", xr);
     Handle.getParam(node_name+"/yr", yr);
+    	
+	Handle.getParam(node_name+"/R",R);
+	Handle.getParam(node_name+"/T",T);
 	// Handle.getParam(FullParamName, RunPeriod)
 	// FullParamName is a path
 	// RunPeriod is where it stores the parameter
@@ -73,7 +77,7 @@ void node::Prepare(void) // Janitor tasks
 
 	/* ROS topics */
 	// create sub/pub 
-	example_subscriber = Handle.subscribe("/lookahead_trajectory", 1, &node::topic1_MessageCallback, this);
+	// example_subscriber = Handle.subscribe("/lookahead_trajectory", 1, &node::topic1_MessageCallback, this);
     feedback_subscriber = Handle.subscribe("/tb_pose", 1, &node::tb_MessageCallback, this);
 	// "/topic1",		topic name
 	// 1,  				buffer size. 1 = as real time as possible.
@@ -82,7 +86,7 @@ void node::Prepare(void) // Janitor tasks
 	// this, 			pointer to the object of the class
 	// when a callback is implemented in an object way
 	// it needs to know the pointer to the node handle
- 	publisher = Handle.advertise<std_msgs::Float64MultiArray>("/lookahead_cmd", 1);
+ 	 publisher = Handle.advertise<std_msgs::Float64MultiArray>("/lookahead_cmd", 1);
 
 	// std_msgs::Float64,  type of msg we are advertising
 	// "/topic2", 			topic name
@@ -104,7 +108,7 @@ void node::RunPeriodically(float Period)
 
 	ROS_INFO("Node %s running periodically (T=%.2fs, f=%.2fHz).", ros::this_node::getName().c_str(), Period, 1.0/Period);
 
-
+    ROS_INFO("Node %s: params xr: %f yr: %f R: %f T: %f", ros::this_node::getName().c_str(),xr,yr,R,T);  
 	// infinite cycle
 	// ros::ok always true unless: 
 	//ctrl+c from the terminal 
@@ -112,7 +116,7 @@ void node::RunPeriodically(float Period)
 	while (ros::ok()) 
 	{
 		// PeriodicTask(); // tasks I actually do...
-        ROS_INFO("Node %s running periodically (T=%.2fs, f=%.2fHz).", ros::this_node::getName().c_str(), Period, 1.0/Period);
+        // ROS_INFO("Node %s running periodically (T=%.2fs, f=%.2fHz).", ros::this_node::getName().c_str(), Period, 1.0/Period);
 
 		ros::spinOnce(); 
 		// after you completed your little tasks,
@@ -138,11 +142,40 @@ void node::Shutdown(void)
 // constant 
 // & pointer
 // to a message std_msgs::Float64 
-void node::topic1_MessageCallback(const std_msgs::Float64MultiArray::ConstPtr& recmsg)
+// void node::topic1_MessageCallback(const std_msgs::Float64MultiArray::ConstPtr& recmsg)
+// {
+// 	/* Receive data from the topic */
+// 	xp_dot = recmsg->data[1];
+//     yp_dot = recmsg->data[2];
+
+//     double v, omega;
+
+//     v = (cos(theta)-yr*sin(theta)/xr)*xp_dot+(sin(theta)+yr*cos(theta)/xr)*yp_dot;
+//     omega = (- sin(theta)*xp_dot + cos(theta)*yp_dot)/xr;
+
+
+//     std_msgs::Float64MultiArray msg;
+//     msg.data.resize(3);
+//     msg.data[0] = ros::Time::now().toSec();
+//     msg.data[1] = v;
+//     msg.data[2] = omega;
+//     publisher.publish(msg);
+
+
+// }
+
+void node::tb_MessageCallback(const std_msgs::Float64MultiArray::ConstPtr& msg)
 {
+
+   
 	/* Receive data from the topic */
-	xp_dot = recmsg->data[1];
-    yp_dot = recmsg->data[2];
+	theta = msg->data[3];
+
+
+    double t = ros::Time::now().toSec();
+    double phi = 2*3.14/T;
+    xp_dot = - R * phi * sin(phi*t);
+    yp_dot = R * phi * cos(phi*t);
 
     double v, omega;
 
@@ -150,20 +183,14 @@ void node::topic1_MessageCallback(const std_msgs::Float64MultiArray::ConstPtr& r
     omega = (- sin(theta)*xp_dot + cos(theta)*yp_dot)/xr;
 
 
-    std_msgs::Float64MultiArray msg;
-    msg.data.resize(3);
-    msg.data[0] = ros::Time::now().toSec();
-    msg.data[1] = v;
-    msg.data[2] = omega;
-    publisher.publish(msg);
+    std_msgs::Float64MultiArray msgtosend;
+    msgtosend.data.resize(3);
+    msgtosend.data[0] = ros::Time::now().toSec();
+    msgtosend.data[1] = v;
+    msgtosend.data[2] = omega;
 
-
-}
-
-void node::tb_MessageCallback(const std_msgs::Float64MultiArray::ConstPtr& msg)
-{
-	/* Receive data from the topic */
-	theta = msg->data[3];
+    ROS_INFO("Node %s: received theta: %f\n calculated v:%f w: %f", ros::this_node::getName().c_str(),theta,v,omega);
+    publisher.publish(msgtosend);
     // yp_dot = msg->data[2];
 }
 
@@ -194,7 +221,7 @@ int main(int argc, char **argv)
 
   node_node.Prepare();
   
-  node_node.RunPeriodically(10.0);
+  node_node.RunPeriodically(0.01);
    
   node_node.Shutdown();
   

@@ -153,10 +153,10 @@ target_link_libraries(lookahead_controller_node
         ${catkin_LIBRARIES}
 )
 
-add_executable(trajectory_generator_node src/trajectory_node.cpp)
-target_link_libraries(trajectory_generator_node
-        ${catkin_LIBRARIES}
-)
+# add_executable(trajectory_generator_node src/trajectory_node.cpp)
+# target_link_libraries(trajectory_generator_node
+#         ${catkin_LIBRARIES}
+# )
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the

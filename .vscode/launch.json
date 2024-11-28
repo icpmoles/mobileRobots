@@ -9,10 +9,10 @@
             "request": "attach"
         },
         {
-            "name": "ROS: Launch PID_Sim",
+            "name": "ROS: Launch Lookahead",
             "type": "ros",
             "request": "launch",
-            "target": "${workspaceFolder}/src/homework_1a/launch/pid_simulator.launch",
+            "target": "${workspaceFolder}/src/homework_3/launch/robot_plus_la.launch",
             "preLaunchTask": "make_debug"
         },
         {

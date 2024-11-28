@@ -7,15 +7,15 @@ int main(int argc, char **argv){
 
 	ros::Publisher chatter_pub = n.advertise<std_msgs::Float64MultiArray>("lookahead_trajectory", 1);
 	std::string node_name = ros::this_node::getName();
-	float R,T,xp_dot,yp_dot;
+	double R,T,xp_dot,yp_dot;
 	n.getParam(node_name+"/R",R);
 	n.getParam(node_name+"/T",T);
 	ros::Rate loop_rate(10.0);
-
+	// ROS_INFO("%s: R: %f  T:%f", ros::this_node::getName().c_str(),R,T);
 	int count = 0;
   	while (ros::ok()){ 
-			float t = ros::Time::now().toSec();
-			float phi = 2*3.14/T;
+			double t = ros::Time::now().toSec();
+			double phi = 2*3.14/T;
             xp_dot = - R * phi * sin(phi*t);
 			yp_dot = R * phi * cos(phi*t);
 	    	std_msgs::Float64MultiArray msg;
@@ -24,6 +24,7 @@ int main(int argc, char **argv){
 			msg.data[1] = xp_dot;
 			msg.data[2] = yp_dot;
     		chatter_pub.publish(msg);
+			// ROS_INFO("%s: xp_dot: %f  yp_dot:%f", ros::this_node::getName().c_str(),xp_dot,yp_dot);
     		ros::spinOnce();
     		loop_rate.sleep(); 
   	}
