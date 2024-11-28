@@ -1,0 +1,24 @@
+# Node example configuration parameters
+  /tb_simulator/Ta  : 0.150   # assigned
+  /tb_simulator/Ts  : 0.010   # at least one decade more for now, tune later
+  /tb_simulator/freq_multiplier  : 10  # for subtick: st = Ts/freq_multiplier
+
+  # Simlation State Initialization
+  /tb_simulator/x0  : 0.0 
+  /tb_simulator/y0  : 0.0 
+  /tb_simulator/theta0  : 0.0 
+  /tb_simulator/v0  : 0.0
+  /tb_simulator/omega0  : 0.0
+
+  /tb_test/v        : 0.1     # m/s
+  /tb_test/omega    : 1.1     # rad/s
+  /tb_test/scan_period   : 0.1     # s
+  /tb_test/wave_period   : 14.0     #s
+  # /traj_planner/a : 5.0
+  # /traj_planner/T : 8.0
+
+  /tb_simulator/endTime : 28.0 #s how long to run the sim during testing
+
+
+  /tb_controller/R: 1.0
+  /tb_controller/T: 5.0

@@ -114,7 +114,7 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(
-# include
+ include
   ${catkin_INCLUDE_DIRS}
 )
 
@@ -131,23 +131,32 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
- add_executable(robot_simulator_node src/robot_node.cpp)
-#  add_executable(lookahead_controller_node src/lookahead_node.cpp)
-#  add_executable(trajectory_generator_node src/trajectory_node.cpp)
+ 
 
 
+
+add_executable(robot_simulator_node src/robot_node.cpp)
 
 target_link_libraries(robot_simulator_node
         ${catkin_LIBRARIES}
 )
 
-# target_link_libraries(lookahead_controller_node
-#         ${catkin_LIBRARIES}
-# )
+add_executable(loop_trajectory_node src/naive_controller.cpp)
 
-# target_link_libraries(trajectory_generator_node
-#         ${catkin_LIBRARIES}
-# )
+target_link_libraries(loop_trajectory_node
+        ${catkin_LIBRARIES}
+)
+
+
+add_executable(lookahead_controller_node src/lookahead_node.cpp)
+target_link_libraries(lookahead_controller_node
+        ${catkin_LIBRARIES}
+)
+
+add_executable(trajectory_generator_node src/trajectory_node.cpp)
+target_link_libraries(trajectory_generator_node
+        ${catkin_LIBRARIES}
+)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the

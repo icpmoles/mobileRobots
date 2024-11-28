@@ -1,6 +1,5 @@
 #include "ros/ros.h"
-#include "geometry_msgs/Pose.h"
-#include "geometry_msgs/Twist.h"
+#include "std_msgs/Float64MultiArray.h"
 #include "rosgraph_msgs/Clock.h"
 #include <boost/numeric/odeint.hpp>
 
@@ -36,7 +35,7 @@ class node_sim
     // where to store the parameters retrieved by the param server
 
     /* ROS topic callbacks */
-    void sub_callback(const geometry_msgs::Twist::ConstPtr& msg);
+    void sub_callback(const std_msgs::Float64MultiArray::ConstPtr& msg);
  
     /* Node periodic task */
     void PeriodicTask(void);
@@ -67,7 +66,7 @@ class node_sim
   
     // we want to use it to pass it to the RunPeriodically in the _core.cpp
     // we make it public
-    void setInitialState(double x, double y,double theta, double v, double omega);
+    void setInitialState(double x, double y,double theta);
     void setModelParams(double Ta);
 
     // void integrate();
@@ -101,7 +100,7 @@ void node_sim::Prepare(void)
 	double Ts = DT;		 // sampling time
 	double init_x,init_y,init_theta,init_v,init_omega;  // state initialization parameters
 
-	this->node_name  = ros::this_node::getName();
+	node_name  = ros::this_node::getName();
 	
 	Handle.getParam(node_name+"/Ta", Ta);
 	Handle.getParam(node_name+"/Ts", Ts);
@@ -115,13 +114,13 @@ void node_sim::Prepare(void)
 	Handle.getParam(node_name+"/omega0", init_omega);
 
 	sim_subscriber = Handle.subscribe("/tb_cmd", 3, &node_sim::sub_callback, this);
- 	simPose_publisher = Handle.advertise<geometry_msgs::Pose>("/tb_pose", 5);
-	simVel_publisher = Handle.advertise<geometry_msgs::Twist>("/tb_vel", 5);
+ 	simPose_publisher = Handle.advertise<std_msgs::Float64MultiArray>("/tb_pose", 5);
+	// simVel_publisher = Handle.advertise<etry_msgs::Twistgeom>("/tb_vel", 5);
 	time_publisher = Handle.advertise<rosgraph_msgs::Clock>("/clock", 10);
 
 	
 
-	setInitialState(init_x,init_y,init_theta,init_v,init_omega);
+	setInitialState(init_x,init_y,init_theta);
 	
 	
     
@@ -144,14 +143,12 @@ void node_sim::Prepare(void)
 	
 }
 
-void node_sim::setInitialState(double x, double y,double theta, double v, double omega){
-	sim_state.resize(5); // specify size of state
+void node_sim::setInitialState(double x, double y,double theta){
+	sim_state.resize(3); // specify size of state
     sim_state[0] = x;
     sim_state[1] = y;	
 	sim_state[2] = theta;	
-	sim_state[3] = v;	
-	sim_state[4] = omega;	
-	ROS_INFO("%s: state init to:  %fm  %fm %frad\n%fm/s %frad/s",node_name.c_str(),x,y,theta,v,omega);
+	ROS_INFO("%s: state init to:  %fm  %fm %frad",node_name.c_str(),x,y,theta);
 }
 
 void node_sim::RunPeriodically(float Period)
@@ -177,25 +174,24 @@ void node_sim::Shutdown(void)
 }
 
 
-void node_sim::sub_callback(const geometry_msgs::Twist::ConstPtr& msg)
+void node_sim::sub_callback(const std_msgs::Float64MultiArray::ConstPtr& msg)
 {
 	// ROS_INFO("%s: received velocity/turn comand: %f %f ", node_name.c_str(), msg->linear.x, msg->angular.z);
 	/* Receive data from the topic */
-	simU_v_cmd = msg->linear.x;
-	simU_omega_cmd = msg->angular.z;
+
+	simU_v_cmd = msg->data[1];
+	simU_omega_cmd = msg->data[2];
 }
 
 void node_sim::PeriodicTask(void)
 {
-	if (ros::Time::now().toSec()>endTime){
-		Shutdown();
-	}
+	// if (ros::Time::now().toSec()>endTime){
+	// 	Shutdown();
+	// }
 	//elaboarate simulation values for more descriptive names
 	simY_x = sim_state[0];
 	simY_y = sim_state[1]; 
 	simY_theta = sim_state[2];
-	simY_v = sim_state[3];
-	simY_omega = sim_state[4];
 
 
 
@@ -203,16 +199,24 @@ void node_sim::PeriodicTask(void)
 	clockMsg.clock = ros::Time(sim_t);
 	time_publisher.publish(clockMsg);
 
-	geometry_msgs::Pose poseMsg;
-	poseMsg.position.x = simY_x;
-	poseMsg.position.y = simY_y;
-	poseMsg.orientation.z = simY_theta;
-	simPose_publisher.publish(poseMsg);
+	std_msgs::Float64MultiArray msg;
+	msg.data.resize(4);
+	msg.data[0] = ros::Time::now().toSec();
+	msg.data[1] = simY_x;
+	msg.data[2] = simY_y;
+	msg.data[3] = simY_theta;
+	simPose_publisher.publish(msg);
 
-	geometry_msgs::Twist twistMsg;
-	twistMsg.linear.x = simY_v;
-	twistMsg.angular.z = simY_omega;
-	simVel_publisher.publish(twistMsg);
+	// std_msgs::Float64MultiArray poseMsg;
+	// poseMsg.position.x = simY_x;
+	// poseMsg.position.y = simY_y;
+	// poseMsg.orientation.z = simY_theta;
+	// simPose_publisher.publish(poseMsg);
+
+	// geometry_msgs::Twist twistMsg;
+	// twistMsg.linear.x = simY_v;
+	// twistMsg.angular.z = simY_omega;
+	// simVel_publisher.publish(twistMsg);
 
 	
 	Simulator_Step();
@@ -231,15 +235,17 @@ void node_sim::simulator_ode(const state_type &state, state_type &dstate, double
     const double sx = state[0]; 
     const double sy = state[1]; 
 	const double stheta = state[2]; 
-    const double sv = state[3]; 
-	const double somega = state[4]; 
+
+	// take U from received cmds
+    double sv = simU_v_cmd; 
+	double somega = simU_omega_cmd; 
 
     // Model equations of a unicycle with dynamics
     dstate[0] = cos(stheta)*sv;
     dstate[1] = sin(stheta)*sv;
 	dstate[2] = somega;
-	dstate[3] = (simU_v_cmd-sv)/Ta;
-	dstate[4] = (simU_omega_cmd-somega)/Ta;
+	// dstate[3] = (simU_v_cmd-sv)/Ta;
+	// dstate[4] = (simU_omega_cmd-somega)/Ta;
 }
 
 
