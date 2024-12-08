@@ -65,8 +65,8 @@ void node::Prepare(void) // Janitor tasks
     node_name = ros::this_node::getName();
 	// FullParamName = ros::this_node::getName()+"/run_period";
 
-    Handle.getParam(node_name+"/xr", xr);
-    Handle.getParam(node_name+"/yr", yr);
+    Handle.getParam("/xr", xr);
+    Handle.getParam("/yr", yr);
     	
 	Handle.getParam(node_name+"/R",R);
 	Handle.getParam(node_name+"/T",T);
@@ -189,7 +189,7 @@ void node::tb_MessageCallback(const std_msgs::Float64MultiArray::ConstPtr& msg)
     msgtosend.data[1] = v;
     msgtosend.data[2] = omega;
 
-    ROS_INFO("Node %s: received theta: %f\n calculated v:%f w: %f", ros::this_node::getName().c_str(),theta,v,omega);
+    // ROS_INFO("Node %s: received theta: %f\n calculated v:%f w: %f", ros::this_node::getName().c_str(),theta,v,omega);
     publisher.publish(msgtosend);
     // yp_dot = msg->data[2];
 }

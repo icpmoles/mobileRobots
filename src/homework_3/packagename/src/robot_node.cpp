@@ -52,6 +52,10 @@ class node_sim
     double Ta; //Time constant robot
 
     double Ts; // sample time
+	
+	double simY_xp, simY_yp; //feedback linearization state vars
+	double xr,yr; //feedback linearization parameters
+
     int freq_multiplier;
     double endTime; //simulation running time
     state_type sim_state;
@@ -113,6 +117,8 @@ void node_sim::Prepare(void)
 	Handle.getParam(node_name+"/v0", init_v);
 	Handle.getParam(node_name+"/omega0", init_omega);
 
+	Handle.getParam("/xr", xr);
+	Handle.getParam("/yr", yr);	
 	sim_subscriber = Handle.subscribe("/tb_cmd", 3, &node_sim::sub_callback, this);
  	simPose_publisher = Handle.advertise<std_msgs::Float64MultiArray>("/tb_pose", 5);
 	// simVel_publisher = Handle.advertise<etry_msgs::Twistgeom>("/tb_vel", 5);
@@ -192,7 +198,8 @@ void node_sim::PeriodicTask(void)
 	simY_x = sim_state[0];
 	simY_y = sim_state[1]; 
 	simY_theta = sim_state[2];
-
+	simY_xp = simY_x + xr * cos(simY_theta) - yr * sin(simY_theta) ;
+	simY_yp = simY_y + xr * sin(simY_theta) + yr * cos(simY_theta) ;
 
 
 	rosgraph_msgs::Clock clockMsg;
@@ -200,11 +207,13 @@ void node_sim::PeriodicTask(void)
 	time_publisher.publish(clockMsg);
 
 	std_msgs::Float64MultiArray msg;
-	msg.data.resize(4);
+	msg.data.resize(6);
 	msg.data[0] = ros::Time::now().toSec();
 	msg.data[1] = simY_x;
 	msg.data[2] = simY_y;
 	msg.data[3] = simY_theta;
+	msg.data[4] = simY_xp;
+	msg.data[5] = simY_yp;
 	simPose_publisher.publish(msg);
 
 	// std_msgs::Float64MultiArray poseMsg;

@@ -136,13 +136,12 @@ include_directories(
 
 
 add_executable(robot_simulator_node src/robot_node.cpp)
-
 target_link_libraries(robot_simulator_node
         ${catkin_LIBRARIES}
 )
 
-add_executable(loop_trajectory_node src/naive_controller.cpp)
 
+add_executable(loop_trajectory_node src/naive_controller.cpp)
 target_link_libraries(loop_trajectory_node
         ${catkin_LIBRARIES}
 )
@@ -150,6 +149,11 @@ target_link_libraries(loop_trajectory_node
 
 add_executable(lookahead_controller_node src/lookahead_node.cpp)
 target_link_libraries(lookahead_controller_node
+        ${catkin_LIBRARIES}
+)
+
+add_executable(controller_node src/full_feedback_node.cpp)
+target_link_libraries(controller_node
         ${catkin_LIBRARIES}
 )
 
