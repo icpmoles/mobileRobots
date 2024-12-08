@@ -12,7 +12,14 @@
             "name": "ROS: Launch Lookahead",
             "type": "ros",
             "request": "launch",
-            "target": "${workspaceFolder}/src/homework_3/launch/robot_plus_la.launch",
+            "target": "${workspaceFolder}/src/homework_3/packagename/launch/robot_plus_la.launch",
+            "preLaunchTask": "make_debug"
+        },
+        {
+            "name": "ROS: Launch La & PI",
+            "type": "ros",
+            "request": "launch",
+            "target": "${workspaceFolder}/src/homework_3/packagename/launch/robot_plus_la_plus_PI.launch",
             "preLaunchTask": "make_debug"
         },
         {

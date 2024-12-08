@@ -39,6 +39,8 @@ class node
     
   public:
     double RunPeriod; 
+    
+    double refreshperiod;
     // we want to use it to pass it to the RunPeriodically in the _core.cpp
     // we make it public 
     
@@ -70,6 +72,8 @@ void node::Prepare(void) // Janitor tasks
     	
 	Handle.getParam(node_name+"/R",R);
 	Handle.getParam(node_name+"/T",T);
+    
+  Handle.getParam(node_name+"/refreshperiod",refreshperiod);
 	// Handle.getParam(FullParamName, RunPeriod)
 	// FullParamName is a path
 	// RunPeriod is where it stores the parameter
@@ -221,7 +225,7 @@ int main(int argc, char **argv)
 
   node_node.Prepare();
   
-  node_node.RunPeriodically(0.01);
+  node_node.RunPeriodically(node_node.refreshperiod);
    
   node_node.Shutdown();
   

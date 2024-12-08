@@ -24,6 +24,9 @@
   /tb_controller/T: 5.0
   /la/R: 1.0
   /la/T: 1.0
+  /la/refreshperiod: 0.01
+  /la/pidKc: 10.01
+  /la/pidTi: 0.01
 
   # feedback linearization parameters
   /xr: 0.2
