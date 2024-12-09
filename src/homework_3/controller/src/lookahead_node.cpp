@@ -8,6 +8,13 @@
  
 #define NAME_OF_THIS_NODE "node_example"
 
+double step( double t, double ts){
+  if (t<ts)
+    return 0.0;
+  else 
+    return 1.0;
+}
+
 class node
 {
   private: 
@@ -35,7 +42,9 @@ class node
     double xp_dot,yp_dot,theta,xr,yr;
     double R,T;
     std::string node_name;
-  
+    double ta,tb, a, b;
+
+
     
   public:
     double RunPeriod; 
@@ -74,6 +83,10 @@ void node::Prepare(void) // Janitor tasks
 	Handle.getParam(node_name+"/T",T);
     
   Handle.getParam(node_name+"/refreshperiod",refreshperiod);
+  Handle.getParam(node_name+"/a",a);
+  Handle.getParam(node_name+"/b",b);
+  Handle.getParam(node_name+"/ta",ta);
+  Handle.getParam(node_name+"/tb",tb);
 	// Handle.getParam(FullParamName, RunPeriod)
 	// FullParamName is a path
 	// RunPeriod is where it stores the parameter
@@ -102,6 +115,7 @@ void node::Prepare(void) // Janitor tasks
 
 	ROS_INFO("Node %s ready to run.", ros::this_node::getName().c_str());
 }
+
 
 
 void node::RunPeriodically(float Period)
@@ -178,12 +192,15 @@ void node::tb_MessageCallback(const std_msgs::Float64MultiArray::ConstPtr& msg)
 
     double t = ros::Time::now().toSec();
     double phi = 2*3.14/T;
-    xp_dot = - R * phi * sin(phi*t);
-    yp_dot = R * phi * cos(phi*t);
+    // xp_dot = - R * phi * sin(phi*t);
+    // yp_dot = R * phi * cos(phi*t);
+
+    xp_dot = a *  step (t,ta);
+    yp_dot = b * step (t,tb);
 
     double v, omega;
 
-    v = (cos(theta)-yr*sin(theta)/xr)*xp_dot+(sin(theta)+yr*cos(theta)/xr)*yp_dot;
+    v = (cos(theta)-yr*sin(theta)/xr)*xp_dot + (sin(theta)+yr*cos(theta)/xr)*yp_dot;
     omega = (- sin(theta)*xp_dot + cos(theta)*yp_dot)/xr;
 
 

@@ -12,7 +12,7 @@
             "name": "ROS: Launch Lookahead",
             "type": "ros",
             "request": "launch",
-            "target": "${workspaceFolder}/src/homework_3/packagename/launch/robot_plus_la.launch",
+            "target": "${workspaceFolder}/src/homework_3/controller/launch/controller.launch",
             "preLaunchTask": "make_debug"
         },
         {

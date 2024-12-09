@@ -27,7 +27,11 @@
   /la/refreshperiod: 0.01
   /la/pidKc: 10.01
   /la/pidTi: 0.01
+  /la/ta: 4.0
+  /la/tb: 9.0
+  /la/a: 1.0
+  /la/b: 9.0
 
   # feedback linearization parameters
-  /xr: 0.2
+  /xr: 0.3 #eta is shared between controller and simulator
   /yr: 0.0
