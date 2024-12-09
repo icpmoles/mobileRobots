@@ -141,10 +141,10 @@ target_link_libraries(robot_simulator_node
 )
 
 
-add_executable(loop_trajectory_node src/naive_controller.cpp)
-target_link_libraries(loop_trajectory_node
-        ${catkin_LIBRARIES}
-)
+# add_executable(loop_trajectory_node src/naive_controller.cpp)
+# target_link_libraries(loop_trajectory_node
+#         ${catkin_LIBRARIES}
+# )
 
 
 add_executable(lookahead_controller_node src/lookahead_node.cpp)
@@ -152,10 +152,10 @@ target_link_libraries(lookahead_controller_node
         ${catkin_LIBRARIES}
 )
 
-add_executable(controller_node src/full_feedback_node.cpp)
-target_link_libraries(controller_node
-        ${catkin_LIBRARIES}
-)
+# add_executable(controller_node src/full_feedback_node.cpp)
+# target_link_libraries(controller_node
+#         ${catkin_LIBRARIES}
+# )
 
 # add_executable(trajectory_generator_node src/trajectory_node.cpp)
 # target_link_libraries(trajectory_generator_node

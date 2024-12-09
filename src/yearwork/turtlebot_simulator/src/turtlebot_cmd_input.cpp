@@ -10,7 +10,7 @@ int main(int argc, char **argv){
 	//, ros::init_options::AnonymousName); // intialize the node with an "automatic random generated" name without needing to remap at every start in case of conflict
 	ros::NodeHandle n; //create nodeHandle
 
-	ros::Publisher chatter_pub = n.advertise<geometry_msgs::Twist>("tb_cmd", 1);
+	ros::Publisher chatter_pub = n.advertise<geometry_msgs::Twist>("cmd", 1);
 	std::string node_name = ros::this_node::getName();
 	float v,omega,scan_period,v_par,omega_par,wave_period,c_t;
 	// Handle.getParam(run_period_name, RunPeriod);

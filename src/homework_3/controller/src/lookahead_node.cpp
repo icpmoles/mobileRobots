@@ -95,7 +95,7 @@ void node::Prepare(void) // Janitor tasks
 	/* ROS topics */
 	// create sub/pub 
 	// example_subscriber = Handle.subscribe("/lookahead_trajectory", 1, &node::topic1_MessageCallback, this);
-    feedback_subscriber = Handle.subscribe("/tb_pose", 1, &node::tb_MessageCallback, this);
+    feedback_subscriber = Handle.subscribe("/state", 1, &node::tb_MessageCallback, this);
 	// "/topic1",		topic name
 	// 1,  				buffer size. 1 = as real time as possible.
 	// &node::topic1_MessageCallback, 

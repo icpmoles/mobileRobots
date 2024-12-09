@@ -5,7 +5,7 @@ int main(int argc, char **argv){
 	ros::init(argc, argv, "loop_traj"); 
 	ros::NodeHandle n; 
 
-	ros::Publisher chatter_pub = n.advertise<std_msgs::Float64MultiArray>("tb_cmd", 1);
+	ros::Publisher chatter_pub = n.advertise<std_msgs::Float64MultiArray>("cmd", 1);
 	std::string node_name = ros::this_node::getName();
 	float R,T,v,omega;
 	n.getParam(node_name+"/R",R);

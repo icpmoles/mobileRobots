@@ -17,8 +17,8 @@
        <plot mode="TimeSeries" style="Dots" flip_x="false" flip_y="false">
         <range left="10.072000" bottom="-1.000000" top="2.000000" right="28.000000"/>
         <limitY min="-1" max="2"/>
-        <curve name="/tb_cmd/angular/z" color="#1f77b4"/>
-        <curve name="/tb_cmd/linear/x" color="#d62728"/>
+        <curve name="/cmd/angular/z" color="#1f77b4"/>
+        <curve name="/cmd/linear/x" color="#d62728"/>
        </plot>
       </DockArea>
      </DockSplitter>
@@ -32,7 +32,7 @@
       <plot mode="XYPlot" style="Lines" flip_x="false" flip_y="false">
        <range left="-0.361813" bottom="-0.978869" top="0.211369" right="1.995294"/>
        <limitY/>
-       <curve name="/tb_pose/position/[x;y]" color="#f14cc1" curve_x="/tb_pose/position/x" curve_y="/tb_pose/position/y"/>
+       <curve name="/state/position/[x;y]" color="#f14cc1" curve_x="/state/position/x" curve_y="/state/position/y"/>
       </plot>
      </DockArea>
     </DockSplitter>
@@ -63,7 +63,7 @@
    <max_array_size value="100"/>
    <boolean_strings_to_number value="true"/>
    <remove_suffix_from_strings value="true"/>
-   <selected_topics value="/clock;/tb_cmd;/tb_pose;/tb_vel"/>
+   <selected_topics value="/clock;/cmd;/state;/tb_vel"/>
   </plugin>
   <plugin ID="UDP Server"/>
   <plugin ID="WebSocket Server"/>

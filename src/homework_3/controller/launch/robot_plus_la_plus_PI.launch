@@ -2,7 +2,7 @@
   <!-- load parameter file -->
   <rosparam file="$(find controller)/config/simulator_params.yaml" command="load"/>
   <rosparam param="/use_sim_time">true</rosparam>
-  <remap from="/lookahead_cmd" to="/tb_cmd"/>
+  <remap from="/lookahead_cmd" to="/cmd"/>
   <node pkg="controller" type="robot_simulator_node" name="tb_simulator" output="screen"/>
    <node pkg="controller" type="controller_node" name="la" output="screen" />
   

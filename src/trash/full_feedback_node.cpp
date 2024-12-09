@@ -57,7 +57,7 @@ void node::Prepare(void)
   Handle.getParam(node_name+"/refreshperiod",refreshperiod);
   Handle.getParam(node_name+"/pidKc",pid_kc);
   Handle.getParam(node_name+"/pidTi",pid_ti);
-  feedback_subscriber = Handle.subscribe("/tb_pose", 1, &node::tb_MessageCallback, this);
+  feedback_subscriber = Handle.subscribe("/state", 1, &node::tb_MessageCallback, this);
  	publisher = Handle.advertise<std_msgs::Float64MultiArray>("/lookahead_cmd", 1);
 
     theta = 0.0;

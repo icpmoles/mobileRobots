@@ -119,8 +119,8 @@ void node_sim::Prepare(void)
 
 	Handle.getParam("/xr", xr);
 	Handle.getParam("/yr", yr);	
-	sim_subscriber = Handle.subscribe("/tb_cmd", 3, &node_sim::sub_callback, this);
- 	simPose_publisher = Handle.advertise<std_msgs::Float64MultiArray>("/tb_pose", 5);
+	sim_subscriber = Handle.subscribe("/cmd", 3, &node_sim::sub_callback, this);
+ 	simPose_publisher = Handle.advertise<std_msgs::Float64MultiArray>("/state", 5);
 	// simVel_publisher = Handle.advertise<etry_msgs::Twistgeom>("/tb_vel", 5);
 	time_publisher = Handle.advertise<rosgraph_msgs::Clock>("/clock", 10);
 

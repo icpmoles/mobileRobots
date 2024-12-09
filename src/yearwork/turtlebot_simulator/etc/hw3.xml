@@ -22,14 +22,14 @@
        <plot mode="TimeSeries" flip_x="false" flip_y="false" style="Lines">
         <range top="0.059542" left="174.902000" right="214.802000" bottom="-0.066984"/>
         <limitY/>
-        <curve name="/tb_cmd/data[1]" color="#d62728"/>
+        <curve name="/cmd/data[1]" color="#d62728"/>
        </plot>
       </DockArea>
       <DockArea name="...">
        <plot mode="TimeSeries" flip_x="false" flip_y="false" style="Lines">
         <range top="6.279995" left="174.902000" right="214.802000" bottom="6.279666"/>
         <limitY/>
-        <curve name="/tb_cmd/data[2]" color="#1ac938"/>
+        <curve name="/cmd/data[2]" color="#1ac938"/>
        </plot>
       </DockArea>
      </DockSplitter>
@@ -43,7 +43,7 @@
       <plot mode="XYPlot" flip_x="false" flip_y="false" style="Lines">
        <range top="-0.690517" left="0.410816" right="0.484504" bottom="-0.757093"/>
        <limitY/>
-       <curve name="/tb_pose/data[[1];2]]" curve_y="/tb_pose/data[2]" curve_x="/tb_pose/data[1]" color="#ff7f0e"/>
+       <curve name="/state/data[[1];2]]" curve_y="/state/data[2]" curve_x="/state/data[1]" color="#ff7f0e"/>
       </plot>
      </DockArea>
     </DockSplitter>
@@ -74,7 +74,7 @@
    <max_array_size value="100"/>
    <boolean_strings_to_number value="true"/>
    <remove_suffix_from_strings value="true"/>
-   <selected_topics value="/lookahead_trajectory;/tb_cmd;/tb_pose"/>
+   <selected_topics value="/lookahead_trajectory;/cmd;/state"/>
   </plugin>
   <plugin ID="UDP Server"/>
   <plugin ID="WebSocket Server"/>
