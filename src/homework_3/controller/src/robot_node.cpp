@@ -67,25 +67,9 @@ class node_sim
     
   public:
     double subtick; 
-  
-    // we want to use it to pass it to the RunPeriodically in the _core.cpp
-    // we make it public
     void setInitialState(double x, double y,double theta);
-    void setModelParams(double Ta);
-
-    // void integrate();
-    // void setInputValues(double u);
-  
-    // void getPose(double &x, double &y, double &theta);
-    // void getTime(double &time); //get time after integration step
-    // void getVel(double &v, double &omega);
-
-    // functions stubs
+    // void setModelParams(double Ta);
     void Prepare(void);
-    
-
-    // runs the periodic loop inside
-    // which then calls the PeriodicTask callback
     void RunPeriodically(float Period);
     
     void Shutdown(void);
@@ -121,30 +105,18 @@ void node_sim::Prepare(void)
 	Handle.getParam("/yr", yr);	
 	sim_subscriber = Handle.subscribe("/cmd", 3, &node_sim::sub_callback, this);
  	simPose_publisher = Handle.advertise<std_msgs::Float64MultiArray>("/state", 5);
-	// simVel_publisher = Handle.advertise<etry_msgs::Twistgeom>("/tb_vel", 5);
 	time_publisher = Handle.advertise<rosgraph_msgs::Clock>("/clock", 10);
-
-	
 
 	setInitialState(init_x,init_y,init_theta);
 	
-	
-    
-
-	/* Node variable initialization */
-	// default value if they haven't been received already
 	sim_t = 0.0;
 	simU_v_cmd = 0.0;  
 	simU_omega_cmd = 0.0;
 	subtick = Ts/freq_multiplier;
-		// // time pub
 	rosgraph_msgs::Clock clockMsg;
-	// what's the new time after running the simulation?
 
 	clockMsg.clock = ros::Time(sim_t);
-	// broadcasts first clock msg
 	time_publisher.publish(clockMsg);
- 	
 	ROS_INFO("%s: Simulator Node ready to run.", node_name.c_str());
 	
 }
@@ -160,7 +132,7 @@ void node_sim::setInitialState(double x, double y,double theta){
 void node_sim::RunPeriodically(float Period)
 {	
 	
-	// ros::Rate  LoopRate(1.0/Period);
+	// This is how it's done, no system call for sleep whatsoever
 	ros::WallRate  LoopRate(1.0/Period);
 	ROS_INFO("%s: running periodically (T=%.2fs, f=%.2fHz).", node_name.c_str(), Period, 1.0/Period);
 	while (ros::ok()) 
@@ -182,18 +154,12 @@ void node_sim::Shutdown(void)
 
 void node_sim::sub_callback(const std_msgs::Float64MultiArray::ConstPtr& msg)
 {
-	// ROS_INFO("%s: received velocity/turn comand: %f %f ", node_name.c_str(), msg->linear.x, msg->angular.z);
-	/* Receive data from the topic */
-
 	simU_v_cmd = msg->data[1];
 	simU_omega_cmd = msg->data[2];
 }
 
 void node_sim::PeriodicTask(void)
 {
-	// if (ros::Time::now().toSec()>endTime){
-	// 	Shutdown();
-	// }
 	//elaboarate simulation values for more descriptive names
 	simY_x = sim_state[0];
 	simY_y = sim_state[1]; 
@@ -215,18 +181,6 @@ void node_sim::PeriodicTask(void)
 	msg.data[4] = simY_xp;
 	msg.data[5] = simY_yp;
 	simPose_publisher.publish(msg);
-
-	// std_msgs::Float64MultiArray poseMsg;
-	// poseMsg.position.x = simY_x;
-	// poseMsg.position.y = simY_y;
-	// poseMsg.orientation.z = simY_theta;
-	// simPose_publisher.publish(poseMsg);
-
-	// geometry_msgs::Twist twistMsg;
-	// twistMsg.linear.x = simY_v;
-	// twistMsg.angular.z = simY_omega;
-	// simVel_publisher.publish(twistMsg);
-
 	
 	Simulator_Step();
 	sim_t += subtick;
