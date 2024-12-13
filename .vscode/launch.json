@@ -19,7 +19,7 @@
             "name": "ROS: Launch La & PI",
             "type": "ros",
             "request": "launch",
-            "target": "${workspaceFolder}/src/homework_3/homework4pkg/launch/hw4.launch",
+            "target": "${workspaceFolder}/src/homework_4/homework4pkg/launch/hw4.launch",
             "preLaunchTask": "make_debug"
         },
         {

@@ -25,20 +25,6 @@ class node
     double R,T;       // trajectory parameters for circle/eight
     std::string node_name;
   
-    //pid
-
-    // double pid_b, pid_a ;
-    // double pidx_u_act   = 0.0;
-    // double pidx_uI_prev = 0.0;
-    // double pidx_y_act   = 0.0;
-    // double pidx_ysp_act = 0.0;
-
-    // double pidy_u_act   = 0.0;
-    // double pidy_uI_prev = 0.0;
-    // double pidy_y_act   = 0.0;
-    // double pidy_ysp_act = 0.0;
-
-    // end of stuff to delete
     double pid_kc, pid_ti;      // PID parameters
     PID PIDx, PIDy; // le PID: initialized with the same parameter
 
