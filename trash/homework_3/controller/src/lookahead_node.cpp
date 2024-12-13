@@ -26,7 +26,7 @@ class node
     std::string node_name;
     double ta,tb, a, b;
 
-
+   
     
   public:
     double RunPeriod; 
@@ -109,7 +109,7 @@ void node::tb_MessageCallback(const std_msgs::Float64MultiArray::ConstPtr& msg)
 int main(int argc, char **argv)
 {
   ros::init(argc, argv, NAME_OF_THIS_NODE);
-  node node_node;
+  node node_node();
   node_node.Prepare();
   node_node.RunPeriodically(node_node.refreshperiod);
   node_node.Shutdown();

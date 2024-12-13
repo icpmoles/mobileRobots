@@ -3,6 +3,7 @@
 #include "std_msgs/Float64MultiArray.h"
 #define RUN_PERIOD_DEFAULT 0.1
 #define NAME_OF_THIS_NODE "node_example"
+#include "hw4_PID.h"
 
 class node
 {
@@ -32,16 +33,21 @@ class node
     double pidy_y_act   = 0.0;
     double pidy_ysp_act = 0.0;
 
+    PID* PIDx, PIDy; //
 
-    
   public:
-  
+    node(void);
     double refreshperiod;
     double RunPeriod; 
     void Prepare(void);
     void RunPeriodically(float Period);
     void Shutdown(void);
 };
+
+node::node(void) {
+  PIDx = new PID(1.0,1.0,1.0);
+  PIDy = new PID(1.0,1.0,1.0);
+}
 
 void node::Prepare(void)
 {
