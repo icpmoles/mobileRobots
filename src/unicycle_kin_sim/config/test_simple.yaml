@@ -1,0 +1,9 @@
+# Test simple configuration parameters
+  /test_simple/run_period: 0.01          # Node execution period
+
+# Trajectory parameters
+  /test_simple/V0: 1.0                     # Linear velocity first value
+  /test_simple/V1: 0.0                     # Linear velocity second value
+  /test_simple/omega0: 0.0                 # Angular velocity first value
+  /test_simple/omega1: 0.5                 # Angular velocity second value
+  /test_simple/T01: 5.0                    # Time to switch from first to second value

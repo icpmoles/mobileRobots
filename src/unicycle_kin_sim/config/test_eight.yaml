@@ -1,0 +1,7 @@
+# Test eight configuration parameters
+  /test_eight/run_period: 0.01           # Node execution period
+
+# Trajectory parameters
+  /test_eight/a: 1.0                     # Amplitude
+  /test_eight/T: 1.0                     # Period
+
