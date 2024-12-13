@@ -1,15 +1,15 @@
 #include "hw4_PID.h"
 
-PID::PID(double Kc, double Ti, double Ts) {
-    a = Kc*Ts/Ti;
-    b = Kc;
-}
-
-void PID::initialize() {
+PID::PID() {
     u_act   = 0.0;
     uI_prev = 0.0;
     y_act   = 0.0;
     ysp_act = 0.0;
+}
+
+void PID::initialize(double Kc, double Ti, double Ts) {
+    a = Kc*Ts/Ti;
+    b = Kc;
 }
 
 void PID::setReference(double ysp) {

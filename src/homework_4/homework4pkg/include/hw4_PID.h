@@ -1,12 +1,12 @@
-#ifndef CONTROL_SYSTEM_PID_H
-#define CONTROL_SYSTEM_PID_H
+#ifndef PID4
+#define PID4
 
 
 class PID {
 public:
-    PID(double Kc, double Ti, double Ts);
+    PID(void); //double Kc, double Ti, double Ts
 
-    void initialize();
+    void initialize(double Kc, double Ti, double Ts);
     void setMeasurement(double y);
     void setReference(double ysp);
     double getControl();
@@ -18,4 +18,4 @@ private:
 };
 
 
-#endif //CONTROL_SYSTEM_PID_H
+#endif //PID4

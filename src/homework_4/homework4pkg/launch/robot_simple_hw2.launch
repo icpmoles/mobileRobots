@@ -1,8 +1,8 @@
 <launch>
   <!-- load parameter file -->
-  <rosparam file="$(find controller)/config/simulator_params.yaml" command="load"/>
+  <rosparam file="$(find homework4pkg)/config/simulator_params.yaml" command="load"/>
   <rosparam param="/use_sim_time">true</rosparam>
   
-  <node pkg="controller" type="robot_simulator_node" name="tb_simulator" output="screen" />
-  <node pkg="controller" type="loop_trajectory_node" name="tb_controller" output="screen" />
+  <node pkg="homework4pkg" type="robot_simulator_node" name="tb_simulator" output="screen" />
+  <node pkg="homework4pkg" type="loop_trajectory_node" name="tb_controller" output="screen" />
 </launch>
