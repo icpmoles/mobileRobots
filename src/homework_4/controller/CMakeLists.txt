@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(homework4pkg)
+project(controller)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
@@ -103,7 +103,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
  INCLUDE_DIRS include
- LIBRARIES homework4pkg
+ LIBRARIES controller
  CATKIN_DEPENDS roscpp std_msgs
  DEPENDS system_lib
 )
@@ -149,8 +149,8 @@ include_directories(
 #   ${catkin_LIBRARIES}
 # )
 
-add_executable(simulator_node src/robot_node.cpp)
-target_link_libraries(simulator_node  ${catkin_LIBRARIES} )
+# add_executable(simulator_node src/robot_node.cpp)
+# target_link_libraries(simulator_node  ${catkin_LIBRARIES} )
 
 add_executable(feedback_node src/feedback_node.cpp)
 target_link_libraries(feedback_node  ${catkin_LIBRARIES} )
