@@ -1,6 +1,6 @@
 
 #include "ros/ros.h"
-#include "hw4_PID.h"
+// #include "hw4_PID.h"
 #include "std_msgs/Float64MultiArray.h"
 #define RUN_PERIOD_DEFAULT 0.1
 #define NAME_OF_THIS_NODE "node_example"
@@ -12,7 +12,7 @@ class node
     ros::NodeHandle Handle; 
     ros::Subscriber example_subscriber;
     ros::Subscriber feedback_subscriber;
-    ros::Publisher publisher;
+    ros::Publisher publisher,tr_publisher;
     
     void tb_MessageCallback(const std_msgs::Float64MultiArray::ConstPtr& msg);
 
@@ -25,8 +25,8 @@ class node
     double R,T;       // trajectory parameters for circle/eight
     std::string node_name;
   
-    double pid_kc, pid_ti;      // PID parameters
-    PID PIDx, PIDy; // le PID: initialized with the same parameter
+    double pid_kc; //, pid_ti;      // PID parameters
+    // PID PIDx, PIDy; // le PID: initialized with the same parameter
 
   public:
     double refreshperiod;
@@ -50,9 +50,10 @@ void node::Prepare(void)
 	Handle.getParam(node_name+"/T",T);
   Handle.getParam(node_name+"/refreshperiod",refreshperiod);
   Handle.getParam(node_name+"/pidKc",pid_kc);
-  Handle.getParam(node_name+"/pidTi",pid_ti);
+  // Handle.getParam(node_name+"/pidTi",pid_ti);
   feedback_subscriber = Handle.subscribe("/state", 1, &node::tb_MessageCallback, this);
- 	publisher = Handle.advertise<std_msgs::Float64MultiArray>("/lookahead_cmd", 1);
+ 	publisher = Handle.advertise<std_msgs::Float64MultiArray>("/cmd", 1);
+  tr_publisher = Handle.advertise<std_msgs::Float64MultiArray>("/trajectory", 1);
 
     theta = 0.0;
 
@@ -60,8 +61,8 @@ void node::Prepare(void)
     // pid_a = pid_kc*pid_ts/pid_ti;
     // pid_b = pid_kc;
 
-    PIDx.initialize(pid_kc,pid_ti,pid_ts);
-    PIDy.initialize(pid_kc,pid_ti,pid_ts);
+    // PIDx.initialize(pid_kc,pid_ti,pid_ts);
+    // PIDy.initialize(pid_kc,pid_ti,pid_ts);
 	ROS_INFO("Node %s ready to run.", ros::this_node::getName().c_str());
 }
 
@@ -98,18 +99,28 @@ void node::PeriodicTask(void) {
   yp_ = R * sin(phi*t);
 
 
-  // COONTROL FEEDBACK
-  PIDx.setMeasurement(xp);
-  PIDy.setMeasurement(yp);
-  PIDx.setReference(xp_);
-  PIDy.setReference(yp_);
+  // XP YP estimation
 
-  PIDx.execute();
-  PIDy.execute();
+  xp = x + xr * cos(theta) - yr * sin(theta);
+  yp = y + xr * sin(theta) + yr * cos(theta);
+
+  // error computation
+  double ex = xp_ - xp;
+  double ey = yp_ - yp;
+
+  // // COONTROL FEEDBACK
+  // PIDx.setMeasurement(xp);
+  // PIDy.setMeasurement(yp);
+  // PIDx.setReference(xp_);
+  // PIDy.setReference(yp_);
+
+  // PIDx.execute();
+  // PIDy.execute();
   // FEED FORWARD
-  double vx = PIDx.getControl() + xp_dot;
-  double vy = PIDy.getControl() + yp_dot;
 
+  double Kp = pid_kc; 
+  double vx = Kp * ex + xp_dot; // PIDx.getControl() +
+  double vy = Kp * ey + yp_dot;
   // double pidy_u_act = PIDy.u_act;
   // double pidx_u_act = PIDx.u_act;
 
@@ -118,24 +129,32 @@ void node::PeriodicTask(void) {
   v = (cos(theta)-yr*sin(theta)/xr)*vx+(sin(theta)+yr*cos(theta)/xr)*vy;
   omega = (- sin(theta)*vx + cos(theta)*vy)/xr;
 
-  // PUBLISHING
+  // PUBLISHING CMD
   std_msgs::Float64MultiArray msgtosend;
   msgtosend.data.resize(3);
   msgtosend.data[0] = t;
   msgtosend.data[1] = v;
   msgtosend.data[2] = omega;
-
-  // ROS_INFO("Node %s: received theta: %f\n calculated v:%f w: %f", ros::this_node::getName().c_str(),theta,v,omega);
   publisher.publish(msgtosend);
+
+  // PUBLISHING TRAJECTORY
+  std_msgs::Float64MultiArray msgtosend_tr;
+  msgtosend_tr.data.resize(5);
+  msgtosend_tr.data[0] = t;
+  msgtosend_tr.data[1] = xp_;
+  msgtosend_tr.data[2] = yp_;
+  msgtosend_tr.data[3] = xp;
+  msgtosend_tr.data[4] = yp;
+  tr_publisher.publish(msgtosend_tr);
 }
 
 void node::tb_MessageCallback(const std_msgs::Float64MultiArray::ConstPtr& msg) {
     // data aquisition
-    x   = msg->data[1];   //not really needed 
-    y   = msg->data[2];   //not really needed 
+    x   = msg->data[1];  
+    y   = msg->data[2];   
 	  theta = msg->data[3];
-    xp  = msg->data[4];
-    yp  = msg->data[5];
+    // xp  = msg->data[4];
+    // yp  = msg->data[5];
     
 }
 

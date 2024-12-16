@@ -152,7 +152,7 @@ include_directories(
 add_executable(simulator_node src/robot_node.cpp)
 target_link_libraries(simulator_node  ${catkin_LIBRARIES} )
 
-add_executable(feedback_node src/feedback_node.cpp src/hw4_PID.cpp)
+add_executable(feedback_node src/feedback_node.cpp)
 target_link_libraries(feedback_node  ${catkin_LIBRARIES} )
 
 #############

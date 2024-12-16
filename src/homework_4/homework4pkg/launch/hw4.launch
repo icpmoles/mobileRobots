@@ -2,7 +2,7 @@
   <!-- load parameter file -->
   <rosparam file="$(find homework4pkg)/config/simulator_params.yaml" command="load"/>
   <rosparam param="/use_sim_time">true</rosparam>
-  <remap from="/lookahead_cmd" to="/cmd"/>
+  <!-- <remap from="/lookahead_cmd" to="/cmd"/> -->
   <node pkg="homework4pkg" type="simulator_node" name="tb_simulator" output="screen"/>
    <node pkg="homework4pkg" type="feedback_node" name="la" output="screen" />
   

@@ -23,9 +23,9 @@
   /tb_controller/R: 1.0
   /tb_controller/T: 5.0
   /la/R: 1.0
-  /la/T: 1.0
+  /la/T: 5.0
   /la/refreshperiod: 0.01
-  /la/pidKc: 10.01
+  /la/pidKc: 5.00
   /la/pidTi: 1.01
   /la/ta: 4.0
   /la/tb: 9.0
@@ -33,5 +33,5 @@
   /la/b: 1.0
 
   # feedback linearization parameters
-  /xr: 0.3 #eta is shared between controller and simulator
+  /xr: 0.1 #eta is shared between controller and simulator
   /yr: 0.0

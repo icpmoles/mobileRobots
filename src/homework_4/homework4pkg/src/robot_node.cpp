@@ -173,13 +173,13 @@ void node_sim::PeriodicTask(void)
 	time_publisher.publish(clockMsg);
 
 	std_msgs::Float64MultiArray msg;
-	msg.data.resize(6);
+	msg.data.resize(4);
 	msg.data[0] = ros::Time::now().toSec();
 	msg.data[1] = simY_x;
 	msg.data[2] = simY_y;
 	msg.data[3] = simY_theta;
-	msg.data[4] = simY_xp;
-	msg.data[5] = simY_yp;
+	// msg.data[4] = simY_xp;
+	// msg.data[5] = simY_yp;
 	simPose_publisher.publish(msg);
 	
 	Simulator_Step();
