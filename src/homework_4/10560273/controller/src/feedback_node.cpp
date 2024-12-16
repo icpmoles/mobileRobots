@@ -50,19 +50,11 @@ void node::Prepare(void)
 	Handle.getParam(node_name+"/T",T);
   Handle.getParam(node_name+"/refreshperiod",refreshperiod);
   Handle.getParam(node_name+"/pidKc",pid_kc);
-  // Handle.getParam(node_name+"/pidTi",pid_ti);
   feedback_subscriber = Handle.subscribe("/state", 1, &node::tb_MessageCallback, this);
  	publisher = Handle.advertise<std_msgs::Float64MultiArray>("/cmd", 1);
   tr_publisher = Handle.advertise<std_msgs::Float64MultiArray>("/trajectory", 1);
 
-    theta = 0.0;
-
-    double pid_ts = refreshperiod;
-    // pid_a = pid_kc*pid_ts/pid_ti;
-    // pid_b = pid_kc;
-
-    // PIDx.initialize(pid_kc,pid_ti,pid_ts);
-    // PIDy.initialize(pid_kc,pid_ti,pid_ts);
+  theta = 0.0;
 	ROS_INFO("Node %s ready to run.", ros::this_node::getName().c_str());
 }
 
@@ -83,8 +75,6 @@ void node::RunPeriodically(float Period)
 
 
 void node::Shutdown(void) {
-  // delete *PIDx;
-  // delete *PIDy;
 	ROS_INFO("Node %s shutting down.", ros::this_node::getName().c_str());
 }
 
@@ -108,21 +98,11 @@ void node::PeriodicTask(void) {
   double ex = xp_ - xp;
   double ey = yp_ - yp;
 
-  // // COONTROL FEEDBACK
-  // PIDx.setMeasurement(xp);
-  // PIDy.setMeasurement(yp);
-  // PIDx.setReference(xp_);
-  // PIDy.setReference(yp_);
-
-  // PIDx.execute();
-  // PIDy.execute();
   // FEED FORWARD
 
   double Kp = pid_kc; 
-  double vx = Kp * ex + xp_dot; // PIDx.getControl() +
+  double vx = Kp * ex + xp_dot; 
   double vy = Kp * ey + yp_dot;
-  // double pidy_u_act = PIDy.u_act;
-  // double pidx_u_act = PIDx.u_act;
 
   // FEEDBACK LINEARIZATION
   double v, omega;
@@ -153,8 +133,6 @@ void node::tb_MessageCallback(const std_msgs::Float64MultiArray::ConstPtr& msg) 
     x   = msg->data[1];  
     y   = msg->data[2];   
 	  theta = msg->data[3];
-    // xp  = msg->data[4];
-    // yp  = msg->data[5];
     
 }
 

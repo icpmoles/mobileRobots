@@ -16,37 +16,20 @@ typedef std::vector<double> state_type;
 #define X50 0.0
 #define TA  0.15
 
-// i want to send float64 msgs between the example nodes
 class node_sim
 {
   private: 
-    ros::NodeHandle Handle; //ROS Handle
-    // initialized at ros::init
-    // needs to be used if you call a function of the 
-    // ROS client library
-    
-    /* ROS topics */
+    ros::NodeHandle Handle; 
     ros::Subscriber sim_subscriber;
     ros::Publisher simPose_publisher;
     ros::Publisher simVel_publisher;
     ros::Publisher time_publisher;
-    /* Parameters from ROS parameter server */
-    // param_type ParamVar;
-    // where to store the parameters retrieved by the param server
-
-    /* ROS topic callbacks */
     void sub_callback(const std_msgs::Float64MultiArray::ConstPtr& msg);
- 
-    /* Node periodic task */
     void PeriodicTask(void);
-    
     void Simulator_Step(void);
-    
     std::string node_name;
     // SIMULATOR ZONE
-    /* Node state variables */
     double simU_v_cmd, simU_omega_cmd;
-    // double simX_x, simX_y, simX_theta, simX_v, simX_omega;
     double simY_x, simY_y, simY_theta, simY_v, simY_omega;
     double sim_t, sim_dt;
     double Ta; //Time constant robot
@@ -83,8 +66,6 @@ class node_sim
 void node_sim::Prepare(void)
 {
 
-	
-	// double Ta;  		 // turtlebot time constant
 	double Ts = DT;		 // sampling time
 	double init_x,init_y,init_theta,init_v,init_omega;  // state initialization parameters
 
@@ -132,7 +113,6 @@ void node_sim::setInitialState(double x, double y,double theta){
 void node_sim::RunPeriodically(float Period)
 {	
 	
-	// This is how it's done, no system call for sleep whatsoever
 	ros::WallRate  LoopRate(1.0/Period);
 	ROS_INFO("%s: running periodically (T=%.2fs, f=%.2fHz).", node_name.c_str(), Period, 1.0/Period);
 	while (ros::ok()) 
@@ -160,7 +140,6 @@ void node_sim::sub_callback(const std_msgs::Float64MultiArray::ConstPtr& msg)
 
 void node_sim::PeriodicTask(void)
 {
-	//elaboarate simulation values for more descriptive names
 	simY_x = sim_state[0];
 	simY_y = sim_state[1]; 
 	simY_theta = sim_state[2];
@@ -178,8 +157,6 @@ void node_sim::PeriodicTask(void)
 	msg.data[1] = simY_x;
 	msg.data[2] = simY_y;
 	msg.data[3] = simY_theta;
-	// msg.data[4] = simY_xp;
-	// msg.data[5] = simY_yp;
 	simPose_publisher.publish(msg);
 	
 	Simulator_Step();
@@ -199,16 +176,12 @@ void node_sim::simulator_ode(const state_type &state, state_type &dstate, double
     const double sy = state[1]; 
 	const double stheta = state[2]; 
 
-	// take U from received cmds
     double sv = simU_v_cmd; 
 	double somega = simU_omega_cmd; 
 
-    // Model equations of a unicycle with dynamics
     dstate[0] = cos(stheta)*sv;
     dstate[1] = sin(stheta)*sv;
 	dstate[2] = somega;
-	// dstate[3] = (simU_v_cmd-sv)/Ta;
-	// dstate[4] = (simU_omega_cmd-somega)/Ta;
 }
 
 
