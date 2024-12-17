@@ -1,3 +1,14 @@
+#ifndef MACRO_HELPER
+#define MACRO_HELPER
+
+#define GPMACRO(pname)                                                                                    \
+	if (false == Handle.getParam(ros::this_node::getName() + "/" + #pname, pname))                         \
+	{                                                                                                      \
+		ROS_ERROR("Node %s: unable to retrieve parameter %s.", ros::this_node::getName().c_str(), #pname); \
+	}
+
+#endif /* MACRO_HELPER */	
+
 #ifndef NODE_EXAMPLE_H_
 #define NODE_EXAMPLE_H_
 #include <boost/numeric/odeint.hpp>
