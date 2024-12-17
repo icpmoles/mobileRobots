@@ -13,10 +13,5 @@
           output="screen"
           required="true"
     />
-  <node name="plotjuggler_with_layout" 
-          pkg="plotjuggler"
-          type="plotjuggler"
-          args="--layout $(find turtlebot_traj_ctrl)/config/plotJug.xml --buffer_size 40 --nosplash"
-          required="true"
-    />
+
 </launch>
