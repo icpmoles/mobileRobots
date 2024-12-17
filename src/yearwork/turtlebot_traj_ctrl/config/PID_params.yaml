@@ -4,23 +4,23 @@
   /tb_simulator/freq_multiplier  : 10  # for subtick: st = Ts/freq_multiplier
   /tb_simulator/endTime  : 100.0
   # Simlation State Initialization
-  /tb_simulator/x0  : 0.0 
-  /tb_simulator/y0  : 0.0 
-  /tb_simulator/theta0  : 0.0 
-  /tb_simulator/v0  : 0.0
-  /tb_simulator/omega0  : 0.0
-
+  /tb_simulator/init_x  : 0.0 
+  /tb_simulator/init_y  : 0.0 
+  /tb_simulator/init_theta  : 0.00 
+  /tb_simulator/init_v  : 0.0
+  /tb_simulator/init_omega  : 0.0
+  
 # CONTROLLER NODE
   # TRAJECTORY
-  /tb_controller/R : 1.0
+  # /tb_controller/R : 1.0
   /tb_controller/a : 5.0
   /tb_controller/T : 8.0
-  /tb_controller/refreshperiod: 0.01
+  /tb_controller/refreshperiod: 0.005
 
   # PID
-  /tb_controller/pid_kc: 5.00
-  /tb_controller/pid_ti: 1.01
+  /tb_controller/pid_kc: 7.0938901446804
+  /tb_controller/pid_ki: 0.331264415656749
 
   # Feedback linearization parameters
-  /tb_controller/xr: 0.1 #eta 
+  /tb_controller/xr: 0.3 #eta 
   /tb_controller/yr: 0.0  

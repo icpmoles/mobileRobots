@@ -34,10 +34,10 @@ private:
 
 	double theta_s, x_s, y_s, yp_s, xp_s; // states of the robot
 	double xr, yr;						  // feedback linearization parameters
-	double a, R, T;						  // trajectory parameters for circle/eight
+	double a, T;						  // trajectory parameters for circle/eight
 	std::string node_name;
 
-	double pid_kc, pid_ti; // PID parameters
+	double pid_kc, pid_ki; // PID parameters
 	PID PIDx, PIDy;		   // le PID: initialized with the same parameter
 
 public:
@@ -54,13 +54,13 @@ void node::Prepare(void)
 	RunPeriod = RUN_PERIOD_DEFAULT;
 	node_name = ros::this_node::getName();
 	GPMACRO(pid_kc);
-	GPMACRO(pid_ti);
+	GPMACRO(pid_ki);
 	GPMACRO(refreshperiod);
 	GPMACRO(T);
 	GPMACRO(a);
 	GPMACRO(xr);
 	GPMACRO(yr);
-	GPMACRO(R);
+	// GPMACRO(R);
 	feedback_subscriber = Handle.subscribe("/state", 1, &node::tb_MessageCallback, this);
 	publisher = Handle.advertise<geometry_msgs::Twist>("/cmd", 1);
 
@@ -70,8 +70,8 @@ void node::Prepare(void)
 	// pid_a = pid_kc*pid_ts/pid_ti;
 	// pid_b = pid_kc;
 
-	PIDx.initialize(pid_kc, pid_ti, pid_ts);
-	PIDy.initialize(pid_kc, pid_ti, pid_ts);
+	PIDx.initialize(pid_kc, 1/pid_ki, pid_ts);
+	PIDy.initialize(pid_kc, 1/pid_ki, pid_ts);
 	ROS_INFO("Node %s ready to run.", ros::this_node::getName().c_str());
 }
 
@@ -80,7 +80,8 @@ void node::RunPeriodically(float Period)
 	ros::Rate LoopRate(1.0 / Period);
 
 	ROS_INFO("Node %s running periodically (T=%.2fs, f=%.2fHz).", ros::this_node::getName().c_str(), Period, 1.0 / Period);
-	ROS_INFO("Node %s: params xr: %f yr: %f R: %f T: %f", ros::this_node::getName().c_str(), xr, yr, R, T);
+	ROS_INFO("Node %s: params xr: %f yr: %f R: %f T: %f", ros::this_node::getName().c_str(), xr, yr, a, T);
+	ROS_INFO("Node %s: PI params KC: %f TI: %f  TS: %f", ros::this_node::getName().c_str(), pid_kc, pid_ti, refreshperiod);
 
 	while (ros::ok())
 	{
@@ -102,11 +103,14 @@ void node::PeriodicTask(void)
 
 	double t = ros::Time::now().toSec();
 	double phi = 2 * 3.14 / T;
+
 	// TRAJECTORY GENERATION
-	xp_dot = -R * phi * sin(phi * t);
-	yp_dot = R * phi * cos(phi * t);
-	xp_ = R * (cos(phi * t) - 1);
-	yp_ = R * sin(phi * t);
+
+	xp_dot = a * phi * cos(phi * t);
+	yp_dot = a * phi * cos( 2* phi * t);
+	xp_ = a * sin(phi * t);
+	yp_ = a * sin(phi * t) * cos(phi * t);
+
 
 	// LOOKAHEAD ESTIMATION
 	xp_s = x_s + xr * cos(theta_s) - yr * sin(theta_s);

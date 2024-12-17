@@ -17,16 +17,26 @@ void node_sim::Prepare(void)
 
 	node_name = ros::this_node::getName();
 
-	Handle.getParam(node_name + "/Ta", Ta);
-	Handle.getParam(node_name + "/Ts", Ts);
-	Handle.getParam(node_name + "/freq_multiplier", freq_multiplier);
-	Handle.getParam(node_name + "/endTime", endTime);
+	GPMACRO(Ta);
+	GPMACRO(Ts);
+	GPMACRO(freq_multiplier);
+	GPMACRO(endTime);
+	GPMACRO(init_x);
+	GPMACRO(init_y);
+	GPMACRO(init_theta);
+	GPMACRO(init_v);
+	GPMACRO(init_omega);
 
-	Handle.getParam(node_name + "/x0", init_x);
-	Handle.getParam(node_name + "/y0", init_y);
-	Handle.getParam(node_name + "/theta0", init_theta);
-	Handle.getParam(node_name + "/v0", init_v);
-	Handle.getParam(node_name + "/omega0", init_omega);
+	// Handle.getParam(node_name + "/Ta", Ta);
+	// Handle.getParam(node_name + "/Ts", Ts);
+	// Handle.getParam(node_name + "/freq_multiplier", freq_multiplier);
+	// Handle.getParam(node_name + "/endTime", endTime);
+
+	// Handle.getParam(node_name + "/x0", init_x);
+	// Handle.getParam(node_name + "/y0", init_y);
+	// Handle.getParam(node_name + "/theta0", init_theta);
+	// Handle.getParam(node_name + "/v0", init_v);
+	// Handle.getParam(node_name + "/omega0", init_omega);
 
 	sim_subscriber = Handle.subscribe("/cmd", 3, &node_sim::sub_callback, this);
 	simPose_publisher = Handle.advertise<geometry_msgs::Pose>("/state", 5);
