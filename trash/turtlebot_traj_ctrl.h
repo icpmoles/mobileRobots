@@ -11,8 +11,8 @@
 
 #include "std_msgs/Float64.h"
 
-#include "geometry_msgs/Pose.h"
-#include "geometry_msgs/Twist.h"
+#include "geometry_msgs/PoseStamped.h"
+#include "geometry_msgs/TwistStamped.h"
 
 // i want to send float64 msgs between the example nodes
  
@@ -23,7 +23,7 @@ class node_contr
     ros::Subscriber y_subscriber;
     ros::Publisher control_publisher;
     /* ROS topic callbacks */
-    void ControllerCallback(const geometry_msgs::Pose::ConstPtr& msg);
+    void ControllerCallback(const geometry_msgs::PoseStamped::ConstPtr& msg);
  
     /* Node periodic task */
     void PeriodicTask(void);

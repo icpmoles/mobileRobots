@@ -39,8 +39,8 @@ void node_sim::Prepare(void)
 	// Handle.getParam(node_name + "/omega0", init_omega);
 
 	sim_subscriber = Handle.subscribe("/cmd", 3, &node_sim::sub_callback, this);
-	simPose_publisher = Handle.advertise<geometry_msgs::Pose>("/state", 5);
-	simVel_publisher = Handle.advertise<geometry_msgs::Twist>("/tb_vel", 5);
+	simPoseStamped_publisher = Handle.advertise<geometry_msgs::PoseStamped>("/state", 5);
+	simVel_publisher = Handle.advertise<geometry_msgs::TwistStamped>("/tb_vel", 5);
 	time_publisher = Handle.advertise<rosgraph_msgs::Clock>("/clock", 10);
 
 	setInitialState(init_x, init_y, init_theta, init_v, init_omega);
@@ -58,7 +58,7 @@ void node_sim::Prepare(void)
 	clockMsg.clock = ros::Time(sim_t);
 	// broadcasts first clock msg
 	time_publisher.publish(clockMsg);
-
+	ros::spinOnce();
 	ROS_INFO("%s: Simulator Node ready to run for %f sec.", node_name.c_str(), endTime);
 }
 
@@ -79,6 +79,10 @@ void node_sim::RunPeriodically(float Period)
 	// ros::Rate  LoopRate(1.0/Period);
 	ros::WallRate LoopRate(1.0 / Period);
 	ROS_INFO("%s: running periodically (T=%.2fs, f=%.2fHz).", node_name.c_str(), Period, 1.0 / Period);
+
+	// Awaits for other nodes before starting the leep
+	sleep(1);
+
 	while (ros::ok())
 	{
 		ros::spinOnce();
@@ -93,12 +97,14 @@ void node_sim::Shutdown(void)
 	ros::shutdown();
 }
 
-void node_sim::sub_callback(const geometry_msgs::Twist::ConstPtr &msg)
+void node_sim::sub_callback(const geometry_msgs::TwistStamped::ConstPtr &msg)
 {
 	// ROS_INFO("%s: received velocity/turn comand: %f %f ", node_name.c_str(), msg->linear.x, msg->angular.z);
 	/* Receive data from the topic */
-	simU_v_cmd = msg->linear.x;
-	simU_omega_cmd = msg->angular.z;
+	simU_v_cmd = msg->twist.linear.x;
+	simU_omega_cmd = msg->twist.angular.z;
+	sent_time = msg->header.stamp;
+	
 }
 
 void node_sim::PeriodicTask(void)
@@ -118,17 +124,19 @@ void node_sim::PeriodicTask(void)
 	clockMsg.clock = ros::Time(sim_t);
 	time_publisher.publish(clockMsg);
 
-	geometry_msgs::Pose poseMsg;
-	poseMsg.position.x = simY_x;
-	poseMsg.position.y = simY_y;
-	poseMsg.orientation.w = cos(simY_theta);
-	poseMsg.orientation.z = sin(simY_theta);
-	simPose_publisher.publish(poseMsg);
+	geometry_msgs::PoseStamped poseMsg;
+	
+	poseMsg.header.stamp = ros::Time::now(); // - sent_time;
+	poseMsg.pose.position.x = simY_x;
+	poseMsg.pose.position.y = simY_y;
+	poseMsg.pose.orientation.w = cos(simY_theta);
+	poseMsg.pose.orientation.z = sin(simY_theta);
+	simPoseStamped_publisher.publish(poseMsg);
 
-	geometry_msgs::Twist twistMsg;
-	twistMsg.linear.x = simY_v;
-	twistMsg.angular.z = simY_omega;
-	simVel_publisher.publish(twistMsg);
+	geometry_msgs::TwistStamped TwistStampedMsg;
+	TwistStampedMsg.twist.linear.x = simY_v;
+	TwistStampedMsg.twist.angular.z = simY_omega;
+	simVel_publisher.publish(TwistStampedMsg);
 
 	Simulator_Step();
 	sim_t += subtick;

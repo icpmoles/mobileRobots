@@ -27,7 +27,7 @@ class node_sim
     
     /* ROS topics */
     ros::Subscriber sim_subscriber;
-    ros::Publisher simPose_publisher;
+    ros::Publisher simPoseStamped_publisher;
     ros::Publisher simVel_publisher;
     ros::Publisher time_publisher;
     /* Parameters from ROS parameter server */
@@ -104,7 +104,7 @@ void node_sim::Prepare(void)
 	Handle.getParam("/xr", xr);
 	Handle.getParam("/yr", yr);	
 	sim_subscriber = Handle.subscribe("/cmd", 3, &node_sim::sub_callback, this);
- 	simPose_publisher = Handle.advertise<std_msgs::Float64MultiArray>("/state", 5);
+ 	simPoseStamped_publisher = Handle.advertise<std_msgs::Float64MultiArray>("/state", 5);
 	time_publisher = Handle.advertise<rosgraph_msgs::Clock>("/clock", 10);
 
 	setInitialState(init_x,init_y,init_theta);
@@ -180,7 +180,7 @@ void node_sim::PeriodicTask(void)
 	msg.data[3] = simY_theta;
 	// msg.data[4] = simY_xp;
 	// msg.data[5] = simY_yp;
-	simPose_publisher.publish(msg);
+	simPoseStamped_publisher.publish(msg);
 	
 	Simulator_Step();
 	sim_t += subtick;

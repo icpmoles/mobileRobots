@@ -22,7 +22,7 @@ class node_sim
     
     /* ROS topics */
     ros::Subscriber sim_subscriber;
-    ros::Publisher simPose_publisher;
+    ros::Publisher simPoseStamped_publisher;
     ros::Publisher simVel_publisher;
     ros::Publisher time_publisher;
     /* Parameters from ROS parameter server */
@@ -67,7 +67,7 @@ class node_sim
     // void integrate();
     // void setInputValues(double u);
   
-    // void getPose(double &x, double &y, double &theta);
+    // void getPoseStamped(double &x, double &y, double &theta);
     // void getTime(double &time); //get time after integration step
     // void getVel(double &v, double &omega);
 

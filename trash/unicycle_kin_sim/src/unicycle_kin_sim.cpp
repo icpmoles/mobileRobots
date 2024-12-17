@@ -79,7 +79,7 @@ void unicycle_kin_sim::PeriodicTask(void)
 
     /*  Extract measurement from simulator */
     double x, y, theta;
-    simulator->getPose(x, y, theta);
+    simulator->getPoseStamped(x, y, theta);
 
     double linvelocity_act, angvelocity_act;
     simulator->getCommands(linvelocity_act, angvelocity_act);

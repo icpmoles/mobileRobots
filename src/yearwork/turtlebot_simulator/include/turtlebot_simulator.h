@@ -19,8 +19,8 @@ typedef std::vector<double> state_type;
 /* Used only if the actual value of the period is not retrieved from the ROS parameter server */
 #define NAME_OF_THIS_NODE "node_example"
 #include "ros/ros.h"
-#include "geometry_msgs/Pose.h"
-#include "geometry_msgs/Twist.h"
+#include "geometry_msgs/PoseStamped.h"
+#include "geometry_msgs/TwistStamped.h"
 #include "rosgraph_msgs/Clock.h"
 
 // i want to send float64 msgs between the example nodes
@@ -34,7 +34,7 @@ class node_sim
     
     /* ROS topics */
     ros::Subscriber sim_subscriber;
-    ros::Publisher simPose_publisher;
+    ros::Publisher simPoseStamped_publisher;
     ros::Publisher simVel_publisher;
     ros::Publisher time_publisher;
     /* Parameters from ROS parameter server */
@@ -42,7 +42,7 @@ class node_sim
     // where to store the parameters retrieved by the param server
 
     /* ROS topic callbacks */
-    void sub_callback(const geometry_msgs::Twist::ConstPtr& msg);
+    void sub_callback(const geometry_msgs::TwistStamped::ConstPtr& msg);
  
     /* Node periodic task */
     void PeriodicTask(void);
@@ -64,7 +64,7 @@ class node_sim
     state_type sim_state;
     boost::numeric::odeint::runge_kutta_dopri5 < state_type > stepper;
     void simulator_ode(const state_type &sim_state, state_type &sim_dstate, double t);
-  
+    ros::Time sent_time;
   
     
     
@@ -79,7 +79,7 @@ class node_sim
     // void integrate();
     // void setInputValues(double u);
   
-    // void getPose(double &x, double &y, double &theta);
+    // void getPoseStamped(double &x, double &y, double &theta);
     // void getTime(double &time); //get time after integration step
     // void getVel(double &v, double &omega);
 

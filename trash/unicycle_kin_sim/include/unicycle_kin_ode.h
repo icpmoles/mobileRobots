@@ -19,7 +19,7 @@ public:
     
     void setReferenceCommands(double linear_velocity, double angular_velocity);
     
-    void getPose(double &x, double &y, double &theta) { x = state[0]; y = state[1]; theta = state[2]; };
+    void getPoseStamped(double &x, double &y, double &theta) { x = state[0]; y = state[1]; theta = state[2]; };
     void getCommands(double &linear_velocity, double &angular_velocity) { linear_velocity = V; angular_velocity = omega; };
     void getTime(double &time) { time = t; };
 

@@ -32,7 +32,7 @@ void node_sim::Prepare(void)
 	Handle.getParam(node_name+"/omega0", init_omega);
 
 	sim_subscriber = Handle.subscribe("/cmd", 3, &node_sim::sub_callback, this);
- 	simPose_publisher = Handle.advertise<std_msgs::Float64MultiArray>("/state", 5);
+ 	simPoseStamped_publisher = Handle.advertise<std_msgs::Float64MultiArray>("/state", 5);
 	simVel_publisher = Handle.advertise<std_msgs::Float64MultiArray>("/tb_vel", 5);
 	time_publisher = Handle.advertise<rosgraph_msgs::Clock>("/clock", 10);
 
@@ -126,16 +126,16 @@ void node_sim::PeriodicTask(void)
 	// clockMsg.clock = ros::Time(sim_t);
 	// time_publisher.publish(clockMsg);
 
-	// geometry_msgs::Pose poseMsg;
+	// geometry_msgs::PoseStamped poseMsg;
 	// poseMsg.position.x = simY_x;
 	// poseMsg.position.y = simY_y;
 	// poseMsg.orientation.z = simY_theta;
-	// simPose_publisher.publish(poseMsg);
+	// simPoseStamped_publisher.publish(poseMsg);
 
-	// geometry_msgs::Twist twistMsg;
-	// twistMsg.linear.x = simY_v;
-	// twistMsg.angular.z = simY_omega;
-	// simVel_publisher.publish(twistMsg);
+	// geometry_msgs::TwistStamped TwistStampedMsg;
+	// TwistStampedMsg.linear.x = simY_v;
+	// TwistStampedMsg.angular.z = simY_omega;
+	// simVel_publisher.publish(TwistStampedMsg);
 
 	
 	Simulator_Step();

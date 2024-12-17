@@ -13,7 +13,7 @@ public:
     void execute();
 
 private:
-    double u_act, uI_prev, y_act, ysp_act;
+    double u_act, uI_prev, y_act, ysp_act,e_prev;
     double a, b;
 };
 

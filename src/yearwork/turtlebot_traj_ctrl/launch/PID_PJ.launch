@@ -1,0 +1,23 @@
+<launch>
+  <!-- load parameter file -->
+  <rosparam file="$(find turtlebot_traj_ctrl)/config/PID_params.yaml" command="load"/>
+  <rosparam param="/use_sim_time">true</rosparam>
+  <node name="tb_controller" 
+          pkg="turtlebot_traj_ctrl"
+          type="tb_ctrl_node"
+          output="screen"
+    />
+  <node name="tb_simulator" 
+          pkg="turtlebot_simulator"
+          type="turtlebot_simulator_node"
+          output="screen"
+          required="true"
+    />
+  <node name="plotjuggler_with_layout" 
+          pkg="plotjuggler"
+          type="plotjuggler"
+          args="--layout $(find turtlebot_traj_ctrl)/config/plotJug.xml --buffer_size 40 --nosplash"
+          required="true"
+  /> 
+    
+</launch>

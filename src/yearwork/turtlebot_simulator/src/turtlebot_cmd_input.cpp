@@ -8,8 +8,8 @@
 
 #include "ros/ros.h"
 // #include "std_msgs/String.h"
-// #include "geometry_msgs/Pose.h"
-#include "geometry_msgs/Twist.h"
+// #include "geometry_msgs/PoseStamped.h"
+#include "geometry_msgs/TwistStamped.h"
 
 int main(int argc, char **argv)
 {
@@ -19,7 +19,7 @@ int main(int argc, char **argv)
 	//, ros::init_options::AnonymousName); // intialize the node with an "automatic random generated" name without needing to remap at every start in case of conflict
 	ros::NodeHandle n; // create nodeHandle
 
-	ros::Publisher chatter_pub = n.advertise<geometry_msgs::Twist>("cmd", 1);
+	ros::Publisher chatter_pub = n.advertise<geometry_msgs::TwistStamped>("cmd", 1);
 	std::string node_name = ros::this_node::getName();
 	float v, omega, scan_period, v_par, omega_par, wave_period, c_t;
 	// Handle.getParam(run_period_name, RunPeriod);
@@ -55,11 +55,11 @@ int main(int argc, char **argv)
 			omega = 0;
 		}
 
-		geometry_msgs::Twist msg;
+		geometry_msgs::TwistStamped msg;
 
-		msg.linear.x = v; // ros msg object only has data field
+		msg.twist.linear.x = v; // ros msg object only has data field
 
-		msg.angular.z = omega;
+		msg.twist.angular.z = omega;
 		// ROS_INFO("%s: Publishing test vel_cmd for turtlebot: %f %f",node_name.c_str(),v,omega); //standard ROS logging/debugging message
 		// we just log the content of our msg
 

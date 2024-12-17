@@ -15,8 +15,8 @@
 // #include "std_msgs/Float64MultiArray.h"
 #define RUN_PERIOD_DEFAULT 0.1
 #define NAME_OF_THIS_NODE "node_example"
-#include "geometry_msgs/Pose.h"
-#include "geometry_msgs/Twist.h"
+#include "geometry_msgs/PoseStamped.h"
+#include "geometry_msgs/TwistStamped.h"
 
 
 class node
@@ -27,7 +27,7 @@ private:
 	ros::Subscriber feedback_subscriber;
 	ros::Publisher publisher,P_pub;
 
-	void tb_MessageCallback(const geometry_msgs::Pose::ConstPtr &msg);
+	void tb_MessageCallback(const geometry_msgs::PoseStamped::ConstPtr &msg);
 
 	double xp_dot, yp_dot; // velocity of trajectory: feedforward
 	double xp_, yp_;	   // cartesian coordinates of trajectory: Feed into PID
@@ -37,7 +37,7 @@ private:
 	double a, T;						  // trajectory parameters for circle/eight
 	std::string node_name;
 
-	double pid_kc, pid_ki; // PID parameters
+	double pid_kc, pid_ti; // PID parameters
 	PID PIDx, PIDy;		   // le PID: initialized with the same parameter
 
 public:
@@ -54,7 +54,7 @@ void node::Prepare(void)
 	RunPeriod = RUN_PERIOD_DEFAULT;
 	node_name = ros::this_node::getName();
 	GPMACRO(pid_kc);
-	GPMACRO(pid_ki);
+	GPMACRO(pid_ti);
 	GPMACRO(refreshperiod);
 	GPMACRO(T);
 	GPMACRO(a);
@@ -62,8 +62,8 @@ void node::Prepare(void)
 	GPMACRO(yr);
 	// GPMACRO(R);
 	feedback_subscriber = Handle.subscribe("/state", 1, &node::tb_MessageCallback, this);
-	publisher = Handle.advertise<geometry_msgs::Twist>("/cmd", 1);
-	P_pub = Handle.advertise<geometry_msgs::Pose>("/setpoint", 1);
+	publisher = Handle.advertise<geometry_msgs::TwistStamped>("/cmd", 1);
+	P_pub = Handle.advertise<geometry_msgs::PoseStamped>("/setpoint", 1);
 
 	theta_s = 0.0;
 
@@ -71,8 +71,8 @@ void node::Prepare(void)
 	// pid_a = pid_kc*pid_ts/pid_ti;
 	// pid_b = pid_kc;
 
-	PIDx.initialize(pid_kc, 1.0*pid_ki, pid_ts);
-	PIDy.initialize(pid_kc, 1.0*pid_ki, pid_ts);
+	PIDx.initialize(pid_kc, pid_ti, pid_ts);
+	PIDy.initialize(pid_kc, pid_ti, pid_ts);
 	ROS_INFO("Node %s ready to run.", ros::this_node::getName().c_str());
 }
 
@@ -82,7 +82,7 @@ void node::RunPeriodically(float Period)
 
 	ROS_INFO("Node %s running periodically (T=%.2fs, f=%.2fHz).", ros::this_node::getName().c_str(), Period, 1.0 / Period);
 	ROS_INFO("Node %s: params xr: %f yr: %f R: %f T: %f", ros::this_node::getName().c_str(), xr, yr, a, T);
-	ROS_INFO("Node %s: PI params KC: %f KI: %f  TS: %f", ros::this_node::getName().c_str(), pid_kc, pid_ki, refreshperiod);
+	ROS_INFO("Node %s: PI params KC: %f KI: %f  TS: %f", ros::this_node::getName().c_str(), pid_kc, pid_ti, refreshperiod);
 
 	while (ros::ok())
 	{
@@ -144,26 +144,26 @@ void node::PeriodicTask(void)
 	//   msgtosend.data[1] = v;
 	//   msgtosend.data[2] = omega;
 
-	geometry_msgs::Twist msg;
-
-	msg.linear.x = v;
-	msg.angular.z = omega;
+	geometry_msgs::TwistStamped msg;
+	msg.header.stamp = ros::Time::now();
+	msg.twist.linear.x = v;
+	msg.twist.angular.z = omega;
 
 	// ROS_INFO("Node %s: received theta: %f\n calculated v:%f w: %f", ros::this_node::getName().c_str(),theta,v,omega);
 	publisher.publish(msg);
 
 
-	geometry_msgs::Pose p_msg;
-	p_msg.position.x = xp_;
-	p_msg.position.y = yp_;
+	geometry_msgs::PoseStamped p_msg;
+	p_msg.pose.position.x = xp_;
+	p_msg.pose.position.y = yp_;
 	P_pub.publish(p_msg);
 }
 
-void node::tb_MessageCallback(const geometry_msgs::Pose::ConstPtr &msg)
+void node::tb_MessageCallback(const geometry_msgs::PoseStamped::ConstPtr &msg)
 {
-	x_s = msg->position.x;
-	y_s = msg->position.y;
-	theta_s = atan2(msg->orientation.z, msg->orientation.w);
+	x_s = msg->pose.position.x;
+	y_s = msg->pose.position.y;
+	theta_s = atan2(msg->pose.orientation.z, msg->pose.orientation.w);
 
 	// data aquisition
 	// x   = msg->data[1];   //not really needed
