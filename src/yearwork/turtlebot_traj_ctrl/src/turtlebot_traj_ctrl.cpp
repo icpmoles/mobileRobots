@@ -1,102 +1,155 @@
-#include "turtlebot_traj_ctrl.h"
 
-void node_contr::Prepare(void) // Janitor tasks
+#include "ros/ros.h"
+#include "turtlebot_traj_ctrl_PI.h"
+#include "std_msgs/Float64MultiArray.h"
+#define RUN_PERIOD_DEFAULT 0.1
+#define NAME_OF_THIS_NODE "node_example"
+
+
+class node
 {
+  private: 
+    ros::NodeHandle Handle; 
+    ros::Subscriber example_subscriber;
+    ros::Subscriber feedback_subscriber;
+    ros::Publisher publisher;
+    
+    void tb_MessageCallback(const std_msgs::Float64MultiArray::ConstPtr& msg);
 
-	std::string kp_path,ki_path,kd_path,run_period_name;
+    double xp_dot,yp_dot; // velocity of trajectory: feedforward
+    double xp_,yp_;       // cartesian coordinates of trajectory: Feed into PID
 
-	kp_path = ros::this_node::getName()+"/kp";
-	ki_path = ros::this_node::getName()+"/ki";
-	kd_path = ros::this_node::getName()+"/kd";
-	// Handle.getParam(run_period_name, RunPeriod);
 
-	Handle.getParam("/tick_multiplier",multiplier);
-	Handle.getParam("/subtick",subtick);
+    double theta,x,y,yp,xp; //states of the robot
+    double xr,yr;     // feedback linearization parameters
+    double R,T;       // trajectory parameters for circle/eight
+    std::string node_name;
+  
+    double pid_kc, pid_ti;      // PID parameters
+    PID PIDx, PIDy; // le PID: initialized with the same parameter
 
-	Handle.getParam(ros::this_node::getName()+"/Kc",Kc);
-	Handle.getParam(ros::this_node::getName()+"/Ti",Ti);
-	
-	Ts = subtick * multiplier;
-	kp_path = ros::this_node::getName()+"/kp";
-	a = Kc*Ts/Ti;
-    b = Kc;
-	// Initialize 
-	u_act   = 0.0;
-    uI_prev = 0.0;
-    y_act   = 0.0;
-    ysp_act = 0.0;
-	y_act = 0.0;
-	Handle.getParam("/equilibrium_angle",ysp_act);
-	y_subscriber = Handle.subscribe("/simulation_output", 3, &node_contr::ControllerCallback, this);
-	
-	ROS_INFO("PID: listening to /simulation_output ");
- 	control_publisher = Handle.advertise<std_msgs::Float64>("/controller_cmd", 10);
-	
-	ROS_INFO("PID: advertising to /controller_cmd ");
+  public:
+    double refreshperiod;
+    double RunPeriod; 
+    void Prepare(void);
+    void PeriodicTask(void);
+    void RunPeriodically(float Period);
+    void Shutdown(void);
+};
 
+void node::Prepare(void)
+{
+	 RunPeriod = RUN_PERIOD_DEFAULT;
+
+  node_name = ros::this_node::getName();
+
+  Handle.getParam("/xr", xr);
+  Handle.getParam("/yr", yr);
+    	
+	Handle.getParam(node_name+"/R",R);
+	Handle.getParam(node_name+"/T",T);
+  Handle.getParam(node_name+"/refreshperiod",refreshperiod);
+  Handle.getParam(node_name+"/pidKc",pid_kc);
+  Handle.getParam(node_name+"/pidTi",pid_ti);
+  feedback_subscriber = Handle.subscribe("/state", 1, &node::tb_MessageCallback, this);
+ 	publisher = Handle.advertise<std_msgs::Float64MultiArray>("/lookahead_cmd", 1);
+
+    theta = 0.0;
+
+    double pid_ts = refreshperiod;
+    // pid_a = pid_kc*pid_ts/pid_ti;
+    // pid_b = pid_kc;
+
+    PIDx.initialize(pid_kc,pid_ti,pid_ts);
+    PIDy.initialize(pid_kc,pid_ti,pid_ts);
 	ROS_INFO("Node %s ready to run.", ros::this_node::getName().c_str());
 }
 
 
-void node_contr::RunPeriodically(float Period)
+void node::RunPeriodically(float Period)
 {	
-
 	ros::Rate LoopRate(1.0/Period);
+
 	ROS_INFO("Node %s running periodically (T=%.2fs, f=%.2fHz).", ros::this_node::getName().c_str(), Period, 1.0/Period);
-	while (ros::ok()) 
-	{
+  ROS_INFO("Node %s: params xr: %f yr: %f R: %f T: %f", ros::this_node::getName().c_str(),xr,yr,R,T);  
+
+	while (ros::ok()) {
+    node::PeriodicTask();
 		ros::spinOnce(); 
 		LoopRate.sleep();
 	}
 }
 
 
-void node_contr::Shutdown(void)
-{
+void node::Shutdown(void) {
+  // delete *PIDx;
+  // delete *PIDy;
 	ROS_INFO("Node %s shutting down.", ros::this_node::getName().c_str());
-	// return 0 in the _core
-	// put here janitorial functions for e.g. safe robot shutdown
+}
 
+void node::PeriodicTask(void) {
+
+	double t = ros::Time::now().toSec();
+  double phi = 2*3.14/T;
+  // TRAJECTORY GENERATION  
+  xp_dot = - R * phi * sin(phi*t);
+  yp_dot = R * phi * cos(phi*t);
+  xp_ =  R * ( cos(phi*t) - 1);
+  yp_ = R * sin(phi*t);
+
+
+  // COONTROL FEEDBACK
+  PIDx.setMeasurement(xp);
+  PIDy.setMeasurement(yp);
+  PIDx.setReference(xp_);
+  PIDy.setReference(yp_);
+
+  PIDx.execute();
+  PIDy.execute();
+  // FEED FORWARD
+  double vx = PIDx.getControl() + xp_dot;
+  double vy = PIDy.getControl() + yp_dot;
+
+  // double pidy_u_act = PIDy.u_act;
+  // double pidx_u_act = PIDx.u_act;
+
+  // FEEDBACK LINEARIZATION
+  double v, omega;
+  v = (cos(theta)-yr*sin(theta)/xr)*vx+(sin(theta)+yr*cos(theta)/xr)*vy;
+  omega = (- sin(theta)*vx + cos(theta)*vy)/xr;
+
+  // PUBLISHING
+  std_msgs::Float64MultiArray msgtosend;
+  msgtosend.data.resize(3);
+  msgtosend.data[0] = t;
+  msgtosend.data[1] = v;
+  msgtosend.data[2] = omega;
+
+  // ROS_INFO("Node %s: received theta: %f\n calculated v:%f w: %f", ros::this_node::getName().c_str(),theta,v,omega);
+  publisher.publish(msgtosend);
+}
+
+void node::tb_MessageCallback(const std_msgs::Float64MultiArray::ConstPtr& msg) {
+    // data aquisition
+    x   = msg->data[1];   //not really needed 
+    y   = msg->data[2];   //not really needed 
+	  theta = msg->data[3];
+    xp  = msg->data[4];
+    yp  = msg->data[5];
+    
 }
 
 
 
-// const std_msgs::Float64::ConstPtr& msg
-// constant 
-// & pointer
-// to a message std_msgs::Float64 
-void node_contr::ControllerCallback(const std_msgs::Float64::ConstPtr& msg)
+int main(int argc, char **argv)
 {
-	/* Receive data from the topic */
-	ROS_INFO("PID: measurement acquired");
-	y_act = msg->data;
-	// double thetaD = msg->y;
-	PID_Step();
-}
-
-void node_contr::PeriodicTask(void)
-{
-	/* Put here the code related to the node task */
-	// /* Publish something on the topic */
-    // std_msgs::Float64 msg; // init msg
-    // msg.data = topic1_data; // loads data into it
-	// control_publisher.publish(msg); // publish it.
-}
-
-void node_contr::PID_Step(void)
-{
-	ROS_INFO("Executing PID Step");
-	// calculate PID controls
-	double uI_act = uI_prev+a*(ysp_act-y_act);
-    double uP_act = b*(ysp_act-y_act);
-	u_act = uP_act+uI_act;
-
-    // Update the state
-    uI_prev = uI_act;
-	// send Control signal
-	std_msgs::Float64 msg; // init msg
-    msg.data = u_act; // loads data into it
-	control_publisher.publish(msg); // publish it.
-	
-	ROS_INFO("PID: u = %f, sp = %f, e = %f",u_act,ysp_act, ysp_act-y_act);
+  ros::init(argc, argv, NAME_OF_THIS_NODE); 
+  node node_node;
+  node_node.Prepare();
+  
+  node_node.RunPeriodically(node_node.refreshperiod);
+   
+  node_node.Shutdown();
+  
+  return (0);
 }

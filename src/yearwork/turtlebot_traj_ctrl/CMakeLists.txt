@@ -135,12 +135,12 @@ include_directories(
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
 
-# CHANGE MEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+# CHANGE MEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE src/turtlebot_traj_ctrl_core.cpp
 
 
 
 
-add_executable( tb_ctrl_node src/turtlebot_traj_ctrl.cpp src/turtlebot_traj_ctrl_core.cpp)
+add_executable( tb_ctrl_node src/turtlebot_traj_ctrl.cpp   src/turtlebot_traj_ctrl_PI.cpp)
 target_link_libraries(tb_ctrl_node ${catkin_LIBRARIES})
 
 

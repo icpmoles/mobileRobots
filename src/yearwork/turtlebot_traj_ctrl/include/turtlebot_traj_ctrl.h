@@ -2,6 +2,7 @@
 #define NODE_EXAMPLE_H_
 
 #include "ros/ros.h"
+#include "turtlebot_traj_ctrl_PI.h"
 
 #define RUN_PERIOD_DEFAULT 0.1
 /* Used only if the actual value of the period is not retrieved from the ROS parameter server */
@@ -16,19 +17,9 @@
 class node_contr
 {
   private: 
-    ros::NodeHandle Handle; //ROS Handle
-    // initialized at ros::init
-    // needs to be used if you call a function of the 
-    // ROS client library
-    
-    /* ROS topics */
+    ros::NodeHandle Handle; 
     ros::Subscriber y_subscriber;
     ros::Publisher control_publisher;
-    
-    /* Parameters from ROS parameter server */
-    // param_type ParamVar;
-    // where to store the parameters retrieved by the param server
-
     /* ROS topic callbacks */
     void ControllerCallback(const std_msgs::Float64::ConstPtr& msg);
  
@@ -38,13 +29,14 @@ class node_contr
     
     /* Node state variables */
 
-    // PID state variables
-    double topic1_data;
-    double u_act, uI_prev, y_act, ysp_act;
-    double a, b;
-    double theta, thetaD;
-    double Kc, Ti, Ts;
-    int multiplier;
+    // // PID state variables
+    // double topic1_data;
+    // double u_act, uI_prev, y_act, ysp_act;
+    // double a, b;
+    // double theta, thetaD;
+    // double Kc, Ti, Ts;
+    // int multiplier;
+    PID PIDx, PIDy; // le PID: initialized with the same parameter
     
   public:
     double subtick; 
