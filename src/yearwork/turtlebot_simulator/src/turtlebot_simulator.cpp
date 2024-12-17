@@ -59,7 +59,7 @@ void node_sim::Prepare(void)
 	// broadcasts first clock msg
 	time_publisher.publish(clockMsg);
 
-	ROS_INFO("%s: Simulator Node ready to run for %f sec.", node_name.c_str(),endTime);
+	ROS_INFO("%s: Simulator Node ready to run for %f sec.", node_name.c_str(), endTime);
 }
 
 void node_sim::setInitialState(double x, double y, double theta, double v, double omega)

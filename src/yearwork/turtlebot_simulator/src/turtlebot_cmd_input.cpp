@@ -71,7 +71,7 @@ int main(int argc, char **argv)
 		// code
 
 		loop_rate.sleep(); // just waits until the next 10Hz loop, better this way
-		// instead of the built in sleep
+						   // instead of the built in sleep
 	}
 
 	return 0;

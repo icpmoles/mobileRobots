@@ -15,12 +15,12 @@
   # /tb_controller/R : 1.0
   /tb_controller/a : 5.0
   /tb_controller/T : 8.0
-  /tb_controller/refreshperiod: 0.005
+  /tb_controller/refreshperiod: 0.01
 
   # PID
-  /tb_controller/pid_kc: 2.25945532459961
-  /tb_controller/pid_ki: 0.0850437718651074
+  /tb_controller/pid_kc: 0.4035
+  /tb_controller/pid_ki: 4.3167
 
   # Feedback linearization parameters
-  /tb_controller/xr: 0.3 #eta 
+  /tb_controller/xr: 0.5 #eta 
   /tb_controller/yr: 0.0  

@@ -25,7 +25,7 @@ private:
 	ros::NodeHandle Handle;
 	ros::Subscriber example_subscriber;
 	ros::Subscriber feedback_subscriber;
-	ros::Publisher publisher;
+	ros::Publisher publisher,P_pub;
 
 	void tb_MessageCallback(const geometry_msgs::Pose::ConstPtr &msg);
 
@@ -63,6 +63,7 @@ void node::Prepare(void)
 	// GPMACRO(R);
 	feedback_subscriber = Handle.subscribe("/state", 1, &node::tb_MessageCallback, this);
 	publisher = Handle.advertise<geometry_msgs::Twist>("/cmd", 1);
+	P_pub = Handle.advertise<geometry_msgs::Pose>("/setpoint", 1);
 
 	theta_s = 0.0;
 
@@ -70,8 +71,8 @@ void node::Prepare(void)
 	// pid_a = pid_kc*pid_ts/pid_ti;
 	// pid_b = pid_kc;
 
-	PIDx.initialize(pid_kc, 1/pid_ki, pid_ts);
-	PIDy.initialize(pid_kc, 1/pid_ki, pid_ts);
+	PIDx.initialize(pid_kc, 1.0*pid_ki, pid_ts);
+	PIDy.initialize(pid_kc, 1.0*pid_ki, pid_ts);
 	ROS_INFO("Node %s ready to run.", ros::this_node::getName().c_str());
 }
 
@@ -81,7 +82,7 @@ void node::RunPeriodically(float Period)
 
 	ROS_INFO("Node %s running periodically (T=%.2fs, f=%.2fHz).", ros::this_node::getName().c_str(), Period, 1.0 / Period);
 	ROS_INFO("Node %s: params xr: %f yr: %f R: %f T: %f", ros::this_node::getName().c_str(), xr, yr, a, T);
-	ROS_INFO("Node %s: PI params KC: %f TI: %f  TS: %f", ros::this_node::getName().c_str(), pid_kc, pid_ti, refreshperiod);
+	ROS_INFO("Node %s: PI params KC: %f KI: %f  TS: %f", ros::this_node::getName().c_str(), pid_kc, pid_ki, refreshperiod);
 
 	while (ros::ok())
 	{
@@ -150,6 +151,12 @@ void node::PeriodicTask(void)
 
 	// ROS_INFO("Node %s: received theta: %f\n calculated v:%f w: %f", ros::this_node::getName().c_str(),theta,v,omega);
 	publisher.publish(msg);
+
+
+	geometry_msgs::Pose p_msg;
+	p_msg.position.x = xp_;
+	p_msg.position.y = yp_;
+	P_pub.publish(p_msg);
 }
 
 void node::tb_MessageCallback(const geometry_msgs::Pose::ConstPtr &msg)
