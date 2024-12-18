@@ -1,39 +1,18 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <root>
- <tabbed_widget parent="main_window" name="Main Window">
-  <Tab tab_name="tab1" containers="1">
+ <tabbed_widget name="Main Window" parent="main_window">
+  <Tab containers="1" tab_name="tab1">
    <Container>
-    <DockSplitter sizes="1" orientation="-" count="1">
+    <DockSplitter sizes="1" count="1" orientation="-">
      <DockArea name="...">
-      <plot flip_y="false" mode="XYPlot" style="Dots" flip_x="false">
-       <range top="2.698429" bottom="-2.662087" left="-5.353525" right="5.353548"/>
+      <plot mode="XYPlot" flip_y="false" style="Lines" flip_x="false">
+       <range left="-5.434777" top="2.720981" bottom="-2.727900" right="5.434642"/>
        <limitY/>
-       <curve curve_y="/state/pose/position/y" curve_x="/state/pose/position/x" name="/state/pose/position/[x;y]" color="#1f77b4"/>
-       <curve curve_y="/setpoint/pose/position/y" curve_x="/setpoint/pose/position/x" name="/setpoint/pose/position/[x;y]" color="#d62728"/>
+       <curve curve_x="/state_p/pose/position/x" name="/state_p/pose/position/[x;y]" color="#1f77b4" curve_y="/state_p/pose/position/y"/>
+       <curve curve_x="/setpoint/pose/position/x" name="/setpoint/pose/position/[x;y]" color="#d62728" curve_y="/setpoint/pose/position/y"/>
+       <curve curve_x="/state/pose/position/x" name="/state/pose/position/[x;y]" color="#1ac938" curve_y="/state/pose/position/y"/>
       </plot>
      </DockArea>
-    </DockSplitter>
-   </Container>
-  </Tab>
-  <Tab tab_name="tab2" containers="1">
-   <Container>
-    <DockSplitter sizes="1" orientation="-" count="1">
-     <DockSplitter sizes="0.5;0.5" orientation="|" count="2">
-      <DockArea name="...">
-       <plot flip_y="false" mode="TimeSeries" style="Lines" flip_x="false">
-        <range top="3.431595" bottom="-3.447466" left="28.750000" right="35.740000"/>
-        <limitY/>
-        <curve name="/cmd/twist/angular/z" color="#1ac938"/>
-       </plot>
-      </DockArea>
-      <DockArea name="...">
-       <plot flip_y="false" mode="TimeSeries" style="Lines" flip_x="false">
-        <range top="6.153480" bottom="1.931707" left="28.750000" right="35.740000"/>
-        <limitY/>
-        <curve name="/cmd/twist/linear/x" color="#ff7f0e"/>
-       </plot>
-      </DockArea>
-     </DockSplitter>
     </DockSplitter>
    </Container>
   </Tab>
@@ -44,7 +23,7 @@
  <!-- - - - - - - - - - - - - - - -->
  <Plugins>
   <plugin ID="DataLoad CSV">
-   <parameters delimiter="0" time_axis=""/>
+   <parameters time_axis="" delimiter="0"/>
   </plugin>
   <plugin ID="DataLoad MCAP"/>
   <plugin ID="DataLoad ROS bags">
@@ -62,7 +41,7 @@
    <max_array_size value="100"/>
    <boolean_strings_to_number value="true"/>
    <remove_suffix_from_strings value="true"/>
-   <selected_topics value="/clock;/cmd;/setpoint;/state"/>
+   <selected_topics value="/setpoint;/state;/state_p"/>
   </plugin>
   <plugin ID="UDP Server"/>
   <plugin ID="WebSocket Server"/>

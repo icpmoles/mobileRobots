@@ -1,14 +1,13 @@
 #ifndef MACRO_HELPER
 #define MACRO_HELPER
 
-#define GPMACRO(pname)                                                                                    \
+#define GPMACRO(pname)                                                                                     \
 	if (false == Handle.getParam(ros::this_node::getName() + "/" + #pname, pname))                         \
 	{                                                                                                      \
 		ROS_ERROR("Node %s: unable to retrieve parameter %s.", ros::this_node::getName().c_str(), #pname); \
 	}
 
-#endif /* MACRO_HELPER */	
-
+#endif /* MACRO_HELPER */
 
 #include "ros/ros.h"
 #include "turtlebot_traj_ctrl_PI.h"
@@ -18,14 +17,13 @@
 #include "geometry_msgs/PoseStamped.h"
 #include "geometry_msgs/TwistStamped.h"
 
-
 class node
 {
 private:
 	ros::NodeHandle Handle;
 	ros::Subscriber example_subscriber;
 	ros::Subscriber feedback_subscriber;
-	ros::Publisher publisher,P_pub;
+	ros::Publisher publisher, sp_pub, p_pub;
 
 	void tb_MessageCallback(const geometry_msgs::PoseStamped::ConstPtr &msg);
 
@@ -38,7 +36,8 @@ private:
 	std::string node_name;
 
 	double pid_kc, pid_ti; // PID parameters
-	PID PIDx, PIDy;		   // le PID: initialized with the same parameter
+	bool shiftf;
+	PID PIDx, PIDy; // le PID: initialized with the same parameter
 
 public:
 	double refreshperiod;
@@ -60,10 +59,12 @@ void node::Prepare(void)
 	GPMACRO(a);
 	GPMACRO(xr);
 	GPMACRO(yr);
+	GPMACRO(shiftf);
 	// GPMACRO(R);
 	feedback_subscriber = Handle.subscribe("/state", 1, &node::tb_MessageCallback, this);
 	publisher = Handle.advertise<geometry_msgs::TwistStamped>("/cmd", 1);
-	P_pub = Handle.advertise<geometry_msgs::PoseStamped>("/setpoint", 1);
+	sp_pub = Handle.advertise<geometry_msgs::PoseStamped>("/setpoint", 1);
+	p_pub = Handle.advertise<geometry_msgs::PoseStamped>("/state_p", 1);
 
 	theta_s = 0.0;
 
@@ -107,11 +108,27 @@ void node::PeriodicTask(void)
 
 	// TRAJECTORY GENERATION
 
-	xp_dot = a * phi * cos(phi * t);
-	yp_dot = a * phi * cos( 2* phi * t);
-	xp_ = a * sin(phi * t);
-	yp_ = a * sin(phi * t) * cos(phi * t);
+	double xg_dot = a * phi * cos(phi * t);
+	double yg_dot = a * phi * cos(2 * phi * t);
 
+	if (shiftf == true)
+	{
+		double alpha_dot = sin(phi * t) / (pow(cos(2 * phi * t), 2) + pow(cos(phi * t), 2));
+		double xg_ = a * sin(phi * t);
+		double yg_ = a * sin(phi * t) * cos(phi * t);
+		double alpha = atan2(xp_dot, yp_dot);
+		xp_ = xg_ + xr * cos(alpha);
+		yp_ = yg_ + xr * sin(alpha);
+		xp_dot = xg_dot - alpha_dot * xr * sin(alpha);
+		yp_dot = yg_dot + alpha_dot * xr * cos(alpha);
+	}
+	else
+	{
+		xp_dot = xg_dot;
+		yp_dot = yg_dot;
+		xp_ = a * sin(phi * t);
+		yp_ = a * sin(phi * t) * cos(phi * t);
+	}
 
 	// LOOKAHEAD ESTIMATION
 	xp_s = x_s + xr * cos(theta_s) - yr * sin(theta_s);
@@ -152,11 +169,19 @@ void node::PeriodicTask(void)
 	// ROS_INFO("Node %s: received theta: %f\n calculated v:%f w: %f", ros::this_node::getName().c_str(),theta,v,omega);
 	publisher.publish(msg);
 
+	geometry_msgs::PoseStamped sp_msg;
+	sp_msg.pose.position.x = xp_;
+	sp_msg.pose.position.y = yp_;
+	// sp_msg.pose.orientation.x = xp_s;
+	// sp_msg.pose.orientation.y = yp_s;
+	sp_pub.publish(sp_msg);
 
+	// ROS_INFO("Node %s: xp_s: %f yp_s:%f ", ros::this_node::getName().c_str(),xp_s,yp_s);
+	// publisher.publish(msg);
 	geometry_msgs::PoseStamped p_msg;
-	p_msg.pose.position.x = xp_;
-	p_msg.pose.position.y = yp_;
-	P_pub.publish(p_msg);
+	p_msg.pose.position.x = xp_s;
+	p_msg.pose.position.y = yp_s;
+	p_pub.publish(p_msg);
 }
 
 void node::tb_MessageCallback(const geometry_msgs::PoseStamped::ConstPtr &msg)

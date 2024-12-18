@@ -1,6 +1,6 @@
 # SIMULATOR NODE
   /tb_simulator/Ta  : 0.150   # assigned
-  /tb_simulator/Ts  : 0.010   # at least one decade more for now, tune later
+  /tb_simulator/Ts  : 0.001   # at least one decade more for now, tune later
   /tb_simulator/freq_multiplier  : 10  # for subtick: st = Ts/freq_multiplier
   /tb_simulator/endTime  : 100.0
   # Simlation State Initialization
@@ -18,9 +18,11 @@
   /tb_controller/refreshperiod: 0.01
 
   # PID
-  /tb_controller/pid_kc: 3.766
-  /tb_controller/pid_ti: 7.626
+  /tb_controller/pid_kc: 0.1
+  /tb_controller/pid_ti: 0.9
 
   # Feedback linearization parameters
   /tb_controller/xr: 0.3 #eta 
   /tb_controller/yr: 0.0  
+
+  /tb_controller/shiftf: false

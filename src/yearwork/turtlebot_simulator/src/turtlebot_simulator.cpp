@@ -12,7 +12,7 @@ void node_sim::Prepare(void)
 {
 
 	// double Ta;  		 // turtlebot time constant
-	double Ts = DT;										   // sampling time
+	// double Ts = DT;										   // sampling time
 	double init_x, init_y, init_theta, init_v, init_omega; // state initialization parameters
 
 	node_name = ros::this_node::getName();
@@ -38,10 +38,11 @@ void node_sim::Prepare(void)
 	// Handle.getParam(node_name + "/v0", init_v);
 	// Handle.getParam(node_name + "/omega0", init_omega);
 
-	sim_subscriber = Handle.subscribe("/cmd", 3, &node_sim::sub_callback, this);
-	simPoseStamped_publisher = Handle.advertise<geometry_msgs::PoseStamped>("/state", 5);
-	simVel_publisher = Handle.advertise<geometry_msgs::TwistStamped>("/tb_vel", 5);
-	time_publisher = Handle.advertise<rosgraph_msgs::Clock>("/clock", 10);
+	sim_subscriber = Handle.subscribe("/cmd", 1, &node_sim::sub_callback, this);
+	// simPoseStamped_sp_publisher = Handle.advertise<geometry_msgs::PoseStamped>("/state_P", 1);
+	simPoseStamped_publisher = Handle.advertise<geometry_msgs::PoseStamped>("/state", 1);
+	simVel_publisher = Handle.advertise<geometry_msgs::TwistStamped>("/tb_vel", 1);
+	time_publisher = Handle.advertise<rosgraph_msgs::Clock>("/clock", 1);
 
 	setInitialState(init_x, init_y, init_theta, init_v, init_omega);
 
@@ -132,6 +133,7 @@ void node_sim::PeriodicTask(void)
 	poseMsg.pose.orientation.w = cos(simY_theta);
 	poseMsg.pose.orientation.z = sin(simY_theta);
 	simPoseStamped_publisher.publish(poseMsg);
+
 
 	geometry_msgs::TwistStamped TwistStampedMsg;
 	TwistStampedMsg.twist.linear.x = simY_v;
