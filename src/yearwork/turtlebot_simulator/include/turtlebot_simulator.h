@@ -58,7 +58,7 @@ class node_sim
     double sim_t, sim_dt;
     double Ta; //Time constant robot
 
-    double Ts; // sample time
+    // double Ts; // sample time
     int freq_multiplier;
     double endTime; //simulation running time
     state_type sim_state;
@@ -69,7 +69,7 @@ class node_sim
     
     
   public:
-    double subtick; 
+    double tick; 
   
     // we want to use it to pass it to the RunPeriodically in the _core.cpp
     // we make it public

@@ -40,7 +40,7 @@ private:
 	PID PIDx, PIDy; // le PID: initialized with the same parameter
 
 public:
-	double refreshperiod;
+	double samplingperiod;
 	double RunPeriod;
 	void Prepare(void);
 	void PeriodicTask(void);
@@ -54,7 +54,7 @@ void node::Prepare(void)
 	node_name = ros::this_node::getName();
 	GPMACRO(pid_kc);
 	GPMACRO(pid_ti);
-	GPMACRO(refreshperiod);
+	GPMACRO(samplingperiod);
 	GPMACRO(T);
 	GPMACRO(a);
 	GPMACRO(xr);
@@ -66,9 +66,9 @@ void node::Prepare(void)
 	sp_pub = Handle.advertise<geometry_msgs::PoseStamped>("/setpoint", 1);
 	p_pub = Handle.advertise<geometry_msgs::PoseStamped>("/state_p", 1);
 
-	theta_s = 0.0;
+	// theta_s = 0.0;
 
-	double pid_ts = refreshperiod;
+	double pid_ts = samplingperiod;
 	// pid_a = pid_kc*pid_ts/pid_ti;
 	// pid_b = pid_kc;
 
@@ -83,7 +83,7 @@ void node::RunPeriodically(float Period)
 
 	ROS_INFO("Node %s running periodically (T=%.2fs, f=%.2fHz).", ros::this_node::getName().c_str(), Period, 1.0 / Period);
 	ROS_INFO("Node %s: params xr: %f yr: %f R: %f T: %f", ros::this_node::getName().c_str(), xr, yr, a, T);
-	ROS_INFO("Node %s: PI params KC: %f KI: %f  TS: %f", ros::this_node::getName().c_str(), pid_kc, pid_ti, refreshperiod);
+	ROS_INFO("Node %s: PI params KC: %f KI: %f  TS: %f", ros::this_node::getName().c_str(), pid_kc, pid_ti, samplingperiod);
 
 	while (ros::ok())
 	{
@@ -110,12 +110,12 @@ void node::PeriodicTask(void)
 
 	double xg_dot = a * phi * cos(phi * t);
 	double yg_dot = a * phi * cos(2 * phi * t);
-
+	double xg_ = a * sin(phi * t);
+	double yg_ = a * sin(phi * t) * cos(phi * t);
 	if (shiftf == true)
 	{
 		double alpha_dot = sin(phi * t) / (pow(cos(2 * phi * t), 2) + pow(cos(phi * t), 2));
-		double xg_ = a * sin(phi * t);
-		double yg_ = a * sin(phi * t) * cos(phi * t);
+		
 		double alpha = atan2(xp_dot, yp_dot);
 		xp_ = xg_ + xr * cos(alpha);
 		yp_ = yg_ + xr * sin(alpha);
@@ -126,8 +126,8 @@ void node::PeriodicTask(void)
 	{
 		xp_dot = xg_dot;
 		yp_dot = yg_dot;
-		xp_ = a * sin(phi * t);
-		yp_ = a * sin(phi * t) * cos(phi * t);
+		xp_ = xg_;
+		yp_ = yg_;
 	}
 
 	// LOOKAHEAD ESTIMATION
@@ -204,7 +204,7 @@ int main(int argc, char **argv)
 	node node_node;
 	node_node.Prepare();
 
-	node_node.RunPeriodically(node_node.refreshperiod);
+	node_node.RunPeriodically(node_node.samplingperiod);
 
 	node_node.Shutdown();
 

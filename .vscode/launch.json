@@ -9,17 +9,17 @@
             "request": "attach"
         },
         {
-            "name": "ROS: Launch Lookahead",
+            "name": "ROS: Launch PI  and plotter",
             "type": "ros",
             "request": "launch",
-            "target": "${workspaceFolder}/src/homework_3/controller/launch/controller.launch",
+            "target": "${workspaceFolder}/src/yearwork/turtlebot_traj_ctrl/launch/PID_PJ.launch",
             "preLaunchTask": "make_debug"
         },
-        {
-            "name": "ROS: Launch La & PI",
+        { 
+            "name": "ROS: Launch PI only",
             "type": "ros",
             "request": "launch",
-            "target": "${workspaceFolder}/src/homework_4/homework4pkg/launch/hw4.launch",
+            "target": "${workspaceFolder}/src/yearwork/turtlebot_traj_ctrl/launch/PID.launch",
             "preLaunchTask": "make_debug"
         },
         {

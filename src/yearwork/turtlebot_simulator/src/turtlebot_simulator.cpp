@@ -1,6 +1,5 @@
 #include "turtlebot_simulator.h"
 
-#define DT 0.15 / 10 // temporary, in case it will be changed by launch parameters
 #define X10 0.0
 #define X20 0.0
 #define X30 0.0
@@ -18,8 +17,8 @@ void node_sim::Prepare(void)
 	node_name = ros::this_node::getName();
 
 	GPMACRO(Ta);
-	GPMACRO(Ts);
-	GPMACRO(freq_multiplier);
+	GPMACRO(tick);
+	// GPMACRO(freq_multiplier);
 	GPMACRO(endTime);
 	GPMACRO(init_x);
 	GPMACRO(init_y);
@@ -27,19 +26,7 @@ void node_sim::Prepare(void)
 	GPMACRO(init_v);
 	GPMACRO(init_omega);
 
-	// Handle.getParam(node_name + "/Ta", Ta);
-	// Handle.getParam(node_name + "/Ts", Ts);
-	// Handle.getParam(node_name + "/freq_multiplier", freq_multiplier);
-	// Handle.getParam(node_name + "/endTime", endTime);
-
-	// Handle.getParam(node_name + "/x0", init_x);
-	// Handle.getParam(node_name + "/y0", init_y);
-	// Handle.getParam(node_name + "/theta0", init_theta);
-	// Handle.getParam(node_name + "/v0", init_v);
-	// Handle.getParam(node_name + "/omega0", init_omega);
-
 	sim_subscriber = Handle.subscribe("/cmd", 1, &node_sim::sub_callback, this);
-	// simPoseStamped_sp_publisher = Handle.advertise<geometry_msgs::PoseStamped>("/state_P", 1);
 	simPoseStamped_publisher = Handle.advertise<geometry_msgs::PoseStamped>("/state", 1);
 	simVel_publisher = Handle.advertise<geometry_msgs::TwistStamped>("/tb_vel", 1);
 	time_publisher = Handle.advertise<rosgraph_msgs::Clock>("/clock", 1);
@@ -51,7 +38,7 @@ void node_sim::Prepare(void)
 	sim_t = 0.0;
 	simU_v_cmd = 0.0;
 	simU_omega_cmd = 0.0;
-	subtick = Ts / freq_multiplier;
+	
 	// // time pub
 	rosgraph_msgs::Clock clockMsg;
 	// what's the new time after running the simulation?
@@ -81,7 +68,7 @@ void node_sim::RunPeriodically(float Period)
 	ros::WallRate LoopRate(1.0 / Period);
 	ROS_INFO("%s: running periodically (T=%.2fs, f=%.2fHz).", node_name.c_str(), Period, 1.0 / Period);
 
-	// Awaits for other nodes before starting the leep
+	// Awaits for other nodes before starting the loop
 	sleep(1);
 
 	while (ros::ok())
@@ -141,12 +128,22 @@ void node_sim::PeriodicTask(void)
 	simVel_publisher.publish(TwistStampedMsg);
 
 	Simulator_Step();
-	sim_t += subtick;
+	sim_t += tick;
 }
 
 void node_sim::Simulator_Step(void)
 {
-	stepper.do_step(std::bind(&node_sim::simulator_ode, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3), sim_state, sim_t, subtick);
+	stepper.do_step( std::bind(
+			&node_sim::simulator_ode, 
+			this, 
+			std::placeholders::_1, 
+			std::placeholders::_2, 
+			std::placeholders::_3
+			), 
+		sim_state, 
+		sim_t, 
+		tick
+	);
 }
 
 void node_sim::simulator_ode(const state_type &state, state_type &dstate, double t)

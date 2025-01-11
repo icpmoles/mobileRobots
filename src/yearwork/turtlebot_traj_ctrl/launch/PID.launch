@@ -6,6 +6,7 @@
           pkg="turtlebot_traj_ctrl"
           type="tb_ctrl_node"
           output="screen"
+          required="true"
     />
   <node name="tb_simulator" 
           pkg="turtlebot_simulator"
