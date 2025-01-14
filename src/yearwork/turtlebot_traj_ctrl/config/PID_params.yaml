@@ -18,8 +18,8 @@
   /tb_controller/samplingperiod: 0.005
 
   # PID
-  /tb_controller/pid_kc: 1.297 #0.5
-  /tb_controller/pid_ti: 44.86 #0.1
+  /tb_controller/pid_kc: 1 #0.5
+  /tb_controller/pid_ti: 23.34 #0.1
 
   # Feedback linearization parameters
   /tb_controller/xr: 0.1 #eta 

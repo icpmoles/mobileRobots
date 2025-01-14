@@ -102,86 +102,99 @@ void node::Shutdown(void)
 
 void node::PeriodicTask(void)
 {
+	double realtime = ros::Time::now().toSec();
 
-	double t = ros::Time::now().toSec();
-	double phi = 2 * 3.14 / T;
+	double wait = 5;
+	double t;
+	double v,omega,xp_,yp_;
+	if (realtime >= wait) {
+		t = realtime - wait;
+	
+		double phi = 2 * 3.14 / T;
 
-	// TRAJECTORY GENERATION
+		// TRAJECTORY GENERATION
 
-	double xg_dot = a * phi * cos(phi * t);
-	double yg_dot = a * phi * cos(2 * phi * t);
-	double xg_ = a * sin(phi * t);
-	double yg_ = a * sin(phi * t) * cos(phi * t);
-	if (shiftf == true)
-	{
-		double alpha_dot = sin(phi * t) / (pow(cos(2 * phi * t), 2) + pow(cos(phi * t), 2));
-		
-		double alpha = atan2(xp_dot, yp_dot);
-		xp_ = xg_ + xr * cos(alpha);
-		yp_ = yg_ + xr * sin(alpha);
-		xp_dot = xg_dot - alpha_dot * xr * sin(alpha);
-		yp_dot = yg_dot + alpha_dot * xr * cos(alpha);
-	}
-	else
-	{
-		xp_dot = xg_dot;
-		yp_dot = yg_dot;
-		xp_ = xg_;
-		yp_ = yg_;
-	}
+		double xg_dot = a * phi * cos(phi * t);
+		double yg_dot = a * phi * cos(2 * phi * t);
+		double xg_ = a * sin(phi * t);
+		double yg_ = a * sin(phi * t) * cos(phi * t);
+		if (shiftf == true)
+		{
+			double alpha_dot = sin(phi * t) / (pow(cos(2 * phi * t), 2) + pow(cos(phi * t), 2));
+			
+			double alpha = atan2(xp_dot, yp_dot);
+			xp_ = xg_ + xr * cos(alpha);
+			yp_ = yg_ + xr * sin(alpha);
+			xp_dot = xg_dot - alpha_dot * xr * sin(alpha);
+			yp_dot = yg_dot + alpha_dot * xr * cos(alpha);
+		}
+		else
+		{
+			xp_dot = xg_dot;
+			yp_dot = yg_dot;
+			xp_ = xg_;
+			yp_ = yg_;
+		}
 
-	// LOOKAHEAD ESTIMATION
-	xp_s = x_s + xr * cos(theta_s) - yr * sin(theta_s);
-	yp_s = y_s + xr * sin(theta_s) + yr * cos(theta_s);
+		// LOOKAHEAD ESTIMATION
+		xp_s = x_s + xr * cos(theta_s) - yr * sin(theta_s); //estimated x of P
+		yp_s = y_s + xr * sin(theta_s) + yr * cos(theta_s); //estimated y of P
 
-	// COONTROL FEEDBACK
-	PIDx.setMeasurement(xp_s);
-	PIDy.setMeasurement(yp_s);
-	PIDx.setReference(xp_);
-	PIDy.setReference(yp_);
+		// COONTROL FEEDBACK
+		PIDx.setMeasurement(xp_s);
+		PIDy.setMeasurement(yp_s);
+		PIDx.setReference(xp_);
+		PIDy.setReference(yp_);
 
-	PIDx.execute();
-	PIDy.execute();
-	// FEED FORWARD
-	double vx = PIDx.getControl() + xp_dot;
-	double vy = PIDy.getControl() + yp_dot;
+		PIDx.execute();
+		PIDy.execute();
+		// FEED FORWARD
+		double vx = PIDx.getControl() + xp_dot;
+		double vy = PIDy.getControl() + yp_dot;
 
-	// double pidy_u_act = PIDy.u_act;
-	// double pidx_u_act = PIDx.u_act;
+		// double pidy_u_act = PIDy.u_act;
+		// double pidx_u_act = PIDx.u_act;
 
-	// FEEDBACK LINEARIZATION
-	double v, omega;
-	v = (cos(theta_s) - yr * sin(theta_s) / xr) * vx + (sin(theta_s) + yr * cos(theta_s) / xr) * vy;
-	omega = (-sin(theta_s) * vx + cos(theta_s) * vy) / xr;
+		// FEEDBACK LINEARIZATION
+		v = (cos(theta_s) - yr * sin(theta_s) / xr) * vx + (sin(theta_s) + yr * cos(theta_s) / xr) * vy;
+		omega = (-sin(theta_s) * vx + cos(theta_s) * vy) / xr;
 
-	// PUBLISHING
-	//   std_msgs::Float64MultiArray msgtosend;
-	//   msgtosend.data.resize(3);
-	//   msgtosend.data[0] = t;
-	//   msgtosend.data[1] = v;
-	//   msgtosend.data[2] = omega;
+		// PUBLISHING
+		//   std_msgs::Float64MultiArray msgtosend;
+		//   msgtosend.data.resize(3);
+		//   msgtosend.data[0] = t;
+		//   msgtosend.data[1] = v;
+		//   msgtosend.data[2] = omega;
+		}  else {// else do nothing
+			v,omega,yp_ = 0;
+			xp_ = xr;
 
-	geometry_msgs::TwistStamped msg;
-	msg.header.stamp = ros::Time::now();
-	msg.twist.linear.x = v;
-	msg.twist.angular.z = omega;
+		}
 
-	// ROS_INFO("Node %s: received theta: %f\n calculated v:%f w: %f", ros::this_node::getName().c_str(),theta,v,omega);
-	publisher.publish(msg);
 
-	geometry_msgs::PoseStamped sp_msg;
-	sp_msg.pose.position.x = xp_;
-	sp_msg.pose.position.y = yp_;
-	// sp_msg.pose.orientation.x = xp_s;
-	// sp_msg.pose.orientation.y = yp_s;
-	sp_pub.publish(sp_msg);
+		geometry_msgs::TwistStamped msg;
+		msg.header.stamp = ros::Time::now();
+		msg.twist.linear.x = v;
+		msg.twist.angular.z = omega;
 
-	// ROS_INFO("Node %s: xp_s: %f yp_s:%f ", ros::this_node::getName().c_str(),xp_s,yp_s);
-	// publisher.publish(msg);
-	geometry_msgs::PoseStamped p_msg;
-	p_msg.pose.position.x = xp_s;
-	p_msg.pose.position.y = yp_s;
-	p_pub.publish(p_msg);
+		// ROS_INFO("Node %s: received theta: %f\n calculated v:%f w: %f", ros::this_node::getName().c_str(),theta,v,omega);
+		publisher.publish(msg);
+
+		geometry_msgs::PoseStamped sp_msg;
+		sp_msg.pose.position.x = xp_;
+		sp_msg.pose.position.y = yp_;
+		// sp_msg.pose.orientation.x = xp_s;
+		// sp_msg.pose.orientation.y = yp_s;
+		sp_pub.publish(sp_msg);
+
+		// ROS_INFO("Node %s: xp_s: %f yp_s:%f ", ros::this_node::getName().c_str(),xp_s,yp_s);
+		// publisher.publish(msg);
+		geometry_msgs::PoseStamped p_msg;
+		p_msg.pose.position.x = xp_s;
+		p_msg.pose.position.y = yp_s;
+		p_pub.publish(p_msg);
+
+	
 }
 
 void node::tb_MessageCallback(const geometry_msgs::PoseStamped::ConstPtr &msg)

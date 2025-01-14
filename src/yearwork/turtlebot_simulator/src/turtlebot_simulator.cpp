@@ -66,10 +66,11 @@ void node_sim::RunPeriodically(float Period)
 
 	// ros::Rate  LoopRate(1.0/Period);
 	ros::WallRate LoopRate(1.0 / Period);
-	ROS_INFO("%s: running periodically (T=%.2fs, f=%.2fHz).", node_name.c_str(), Period, 1.0 / Period);
-
+	
 	// Awaits for other nodes before starting the loop
+	ROS_INFO("%s: waiting for other nodes.", node_name.c_str());
 	sleep(1);
+	ROS_INFO("%s: running periodically (T=%.2fs, f=%.2fHz).", node_name.c_str(), Period, 1.0 / Period);
 
 	while (ros::ok())
 	{
