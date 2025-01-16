@@ -16,6 +16,7 @@
   /tb_controller/a : 5.0
   /tb_controller/T : 8.0
   /tb_controller/samplingperiod: 0.005
+  /tb_controller/wait: 5
 
   # PID
   /tb_controller/pid_kc: 1 #0.5

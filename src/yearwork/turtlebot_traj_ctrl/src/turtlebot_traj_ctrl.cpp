@@ -37,6 +37,7 @@ private:
 
 	double pid_kc, pid_ti; // PID parameters
 	bool shiftf;
+	double wait;
 	PID PIDx, PIDy; // le PID: initialized with the same parameter
 
 public:
@@ -104,7 +105,6 @@ void node::PeriodicTask(void)
 {
 	double realtime = ros::Time::now().toSec();
 
-	double wait = 5;
 	double t;
 	double v,omega,xp_,yp_;
 	if (realtime >= wait) {
