@@ -2,7 +2,7 @@
   /tb_simulator/Ta  : 0.150   # assigned
   /tb_simulator/tick  : 0.0001   # at least one decade more for now, tune later
   # /tb_simulator/freq_multiplier  : 10  # for subtick: st = Ts/freq_multiplier
-  /tb_simulator/endTime  : 100.0
+  /tb_simulator/endTime  : 30.0
   # Simlation State Initialization
   /tb_simulator/init_x  : 0.0 
   /tb_simulator/init_y  : 0.0 
@@ -16,7 +16,7 @@
   /tb_controller/a : 5.0
   /tb_controller/T : 8.0
   /tb_controller/samplingperiod: 0.005
-  /tb_controller/wait: 5
+  /tb_controller/wait: 1
 
   # PID
   /tb_controller/pid_kc: 1 #0.5
