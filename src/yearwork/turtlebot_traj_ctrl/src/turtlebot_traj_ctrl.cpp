@@ -194,7 +194,6 @@ void node::PeriodicTask(void)
 		e_msg.header.stamp = now;
 		e_msg.vector.x = ex_;
 		e_msg.vector.y = ey_;
-		// e_msg.vector.z = sqrt(pow(ex_,2)+pow(ey_,2));
 		error_pub.publish(e_msg);
 
 	
@@ -204,7 +203,7 @@ void node::tb_MessageCallback(const geometry_msgs::PoseStamped::ConstPtr &msg)
 {
 	x_s = msg->pose.position.x;
 	y_s = msg->pose.position.y;
-	theta_s = atan2(msg->pose.orientation.z, msg->pose.orientation.w);
+	theta_s = 2 * atan2(msg->pose.orientation.z, msg->pose.orientation.w);
 }
 
 int main(int argc, char **argv)

@@ -118,8 +118,8 @@ void node_sim::PeriodicTask(void)
 	poseMsg.header.stamp = ros::Time::now(); // - sent_time;
 	poseMsg.pose.position.x = simY_x;
 	poseMsg.pose.position.y = simY_y;
-	poseMsg.pose.orientation.w = cos(simY_theta);
-	poseMsg.pose.orientation.z = sin(simY_theta);
+	poseMsg.pose.orientation.w = cos(simY_theta/2);
+	poseMsg.pose.orientation.z = sin(simY_theta/2);
 	simPoseStamped_publisher.publish(poseMsg);
 
 

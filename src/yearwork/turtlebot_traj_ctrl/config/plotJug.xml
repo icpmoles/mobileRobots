@@ -1,12 +1,12 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <root>
  <tabbed_widget name="Main Window" parent="main_window">
-  <Tab tab_name="trajectory" containers="1">
+  <Tab containers="1" tab_name="trajectory">
    <Container>
-    <DockSplitter sizes="1" count="1" orientation="-">
+    <DockSplitter orientation="-" count="1" sizes="1">
      <DockArea name="...">
-      <plot flip_y="false" style="Lines" flip_x="false" mode="XYPlot">
-       <range left="-5.609946" bottom="-2.714840" top="2.749702" right="5.304907"/>
+      <plot style="Lines" flip_y="false" flip_x="false" mode="XYPlot">
+       <range bottom="-1.906409" top="2.607455" left="-2.007990" right="7.007985"/>
        <limitY/>
        <curve color="#1f77b4" curve_y="/state_p/pose/position/y" name="/state_p/pose/position/[x;y]" curve_x="/state_p/pose/position/x"/>
        <curve color="#d62728" curve_y="/setpoint/pose/position/y" name="/setpoint/pose/position/[x;y]" curve_x="/setpoint/pose/position/x"/>
@@ -16,27 +16,26 @@
     </DockSplitter>
    </Container>
   </Tab>
-  <Tab tab_name="errors" containers="1">
+  <Tab containers="1" tab_name="errors">
    <Container>
-    <DockSplitter sizes="1" count="1" orientation="-">
+    <DockSplitter orientation="-" count="1" sizes="1">
      <DockArea name="...">
-      <plot flip_y="false" style="Lines" flip_x="false" mode="TimeSeries">
-       <range left="47.536600" bottom="-0.235920" top="0.264339" right="54.531700"/>
+      <plot style="Lines" flip_y="false" flip_x="false" mode="TimeSeries">
+       <range bottom="-1.043272" top="0.651599" left="1.302700" right="7.512600"/>
        <limitY/>
        <curve color="#cc0eff" name="/error/vector/x"/>
        <curve color="#f14cca" name="/error/vector/y"/>
-       <!-- <curve color="#0eff3c" name="/error/vector/z"/> -->
       </plot>
      </DockArea>
     </DockSplitter>
    </Container>
   </Tab>
-  <Tab tab_name="tab2" containers="1">
+  <Tab containers="1" tab_name="latency">
    <Container>
-    <DockSplitter sizes="1" count="1" orientation="-">
+    <DockSplitter orientation="-" count="1" sizes="1">
      <DockArea name="...">
-      <plot flip_y="false" style="Lines" flip_x="false" mode="TimeSeries">
-       <range left="47.534400" bottom="-0.007497" top="0.004997" right="54.534300"/>
+      <plot style="Lines" flip_y="false" flip_x="false" mode="TimeSeries">
+       <range bottom="-0.012802" top="0.008302" left="1.271400" right="7.517100"/>
        <limitY/>
        <curve color="#ff7f0e" name="latency"/>
       </plot>
@@ -44,7 +43,20 @@
     </DockSplitter>
    </Container>
   </Tab>
-  <currentTabIndex index="2"/>
+  <Tab containers="1" tab_name="yaw">
+   <Container>
+    <DockSplitter orientation="-" count="1" sizes="1">
+     <DockArea name="...">
+      <plot style="Lines" flip_y="false" flip_x="false" mode="TimeSeries">
+       <range bottom="-3.298116" top="3.298234" left="1.271400" right="7.517100"/>
+       <limitY/>
+       <curve color="#ff7f0e" name="/state/pose/orientation/yaw"/>
+      </plot>
+     </DockArea>
+    </DockSplitter>
+   </Container>
+  </Tab>
+  <currentTabIndex index="0"/>
  </tabbed_widget>
  <use_relative_time_offset enabled="0"/>
  <!-- - - - - - - - - - - - - - - -->
