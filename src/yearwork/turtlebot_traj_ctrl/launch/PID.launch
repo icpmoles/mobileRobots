@@ -14,5 +14,7 @@
           output="screen"
           required="true"
     />
+  
+  <param name="/tb_controller/wait" type="double" value="0.1" />
 
 </launch>

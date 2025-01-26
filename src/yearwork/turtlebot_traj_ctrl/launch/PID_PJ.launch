@@ -19,5 +19,7 @@
           args="--layout $(find turtlebot_traj_ctrl)/config/plotJug.xml --buffer_size 7 --nosplash"
           required="true"
   /> 
-    
+  <param name="/tb_controller/wait" type="double" value="5.0" />
+
+  
 </launch>
