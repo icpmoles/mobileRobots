@@ -16,14 +16,15 @@
 #define NAME_OF_THIS_NODE "node_example"
 #include "geometry_msgs/PoseStamped.h"
 #include "geometry_msgs/TwistStamped.h"
+#include "geometry_msgs/Vector3Stamped.h"
 
 class node
 {
 private:
 	ros::NodeHandle Handle;
-	ros::Subscriber example_subscriber;
+	// ros::Subscriber example_subscriber;
 	ros::Subscriber feedback_subscriber;
-	ros::Publisher publisher, sp_pub, p_pub;
+	ros::Publisher cmd_pub, sp_pub, p_pub, error_pub;
 
 	void tb_MessageCallback(const geometry_msgs::PoseStamped::ConstPtr &msg);
 
@@ -79,10 +80,10 @@ void node::Prepare(void)
 	// GPMACRO(shiftf);
 	// GPMACRO(R);
 	feedback_subscriber = Handle.subscribe("/state", 1, &node::tb_MessageCallback, this);
-	publisher = Handle.advertise<geometry_msgs::TwistStamped>("/cmd", 1); // cmd publisher
+	cmd_pub = Handle.advertise<geometry_msgs::TwistStamped>("/cmd", 1); // cmd publisher
 	sp_pub = Handle.advertise<geometry_msgs::PoseStamped>("/setpoint", 1); // setpoint publisher
 	p_pub = Handle.advertise<geometry_msgs::PoseStamped>("/state_p", 1);	// state from feedback linearization publisher
-
+	error_pub = Handle.advertise<geometry_msgs::Vector3Stamped>("/error", 1);	//error publisher
 	// theta_s = 0.0;
 
 	double pid_ts = samplingperiod;
@@ -119,40 +120,24 @@ void node::Shutdown(void)
 
 void node::PeriodicTask(void)
 {
-	double realtime = ros::Time::now().toSec();
-
+	ros::Time now = ros::Time::now();
+	double realtime = now.toSec();
+	
 	double t;
 	double v;		// velocity cmd
 	double omega; 	// twist cmd
-	if (realtime >= wait) {
+
+
+	// In case plotjuggler doesn't start fast enough we wait n seconds and start everything with
+	// a time shifted backwards t = (wallclock - shift)
+	if (realtime >= wait) { 
 		t = realtime - wait;
 	
 		double phi = 2 * 3.14 / T;
-
-		// TRAJECTORY GENERATION
-
 		 xp_dot = a * phi * cos(phi * t);
 		 yp_dot = a * phi * cos(2 * phi * t);
 		 xp_ = a * sin(phi * t);
 		 yp_ = a * sin(phi * t) * cos(phi * t);
-		// if (shiftf == true)
-		// {
-		// 	double alpha_dot = sin(phi * t) / (pow(cos(2 * phi * t), 2) + pow(cos(phi * t), 2));
-			
-		// 	double alpha = atan2(xp_dot, yp_dot);
-		// 	xp_ = xg_ + xr * cos(alpha);
-		// 	yp_ = yg_ + xr * sin(alpha);
-		// 	xp_dot = xg_dot - alpha_dot * xr * sin(alpha);
-		// 	yp_dot = yg_dot + alpha_dot * xr * cos(alpha);
-		// }
-		// else
-		//  {
-		// 	xp_dot = xg_dot;
-		// 	yp_dot = yg_dot;
-		// 	xp_ = xg_;
-		// 	yp_ = yg_;
-		// }
-
 		// COONTROL FEEDBACK
 		PIDx.setMeasurement(xp_s);
 		PIDy.setMeasurement(yp_s);
@@ -165,19 +150,10 @@ void node::PeriodicTask(void)
 		double vx = PIDx.getControl() + xp_dot; // x component of V_ vector
 		double vy = PIDy.getControl() + yp_dot;	// y component of V_ vector
 
-		// double pidy_u_act = PIDy.u_act;
-		// double pidx_u_act = PIDx.u_act;
-
 		// FEEDBACK LINEARIZATION
 		v = (cos(theta_s) - yr * sin(theta_s) / xr) * vx + (sin(theta_s) + yr * cos(theta_s) / xr) * vy; // i component of V_ vector
 		omega = (-sin(theta_s) * vx + cos(theta_s) * vy) / xr;											// "j" component of V_ vector
 
-		// PUBLISHING
-		//   std_msgs::Float64MultiArray msgtosend;
-		//   msgtosend.data.resize(3);
-		//   msgtosend.data[0] = t;
-		//   msgtosend.data[1] = v;
-		//   msgtosend.data[2] = omega;
 		}  else {// else do nothing
 			v,omega=0;
 			yp_ = 0;
@@ -189,26 +165,37 @@ void node::PeriodicTask(void)
 		xp_s = x_s + xr * cos(theta_s) - yr * sin(theta_s); //estimated x of P
 		yp_s = y_s + xr * sin(theta_s) + yr * cos(theta_s); //estimated y of P
 
-
+	
+		// Publishes velocity/rotation comands
 		geometry_msgs::TwistStamped msg;
-		msg.header.stamp = ros::Time::now();
+		msg.header.stamp = now;
 		msg.twist.linear.x = v;
 		msg.twist.angular.z = omega;
-		publisher.publish(msg);
+		cmd_pub.publish(msg);
 
+		// Publishes desired trajectory
 		geometry_msgs::PoseStamped sp_msg;
+		sp_msg.header.stamp = now;
 		sp_msg.pose.position.x = xp_;
 		sp_msg.pose.position.y = yp_;
-		// sp_msg.pose.orientation.x = xp_s;
-		// sp_msg.pose.orientation.y = yp_s;
 		sp_pub.publish(sp_msg);
 
-		// ROS_INFO("Node %s: xp_s: %f yp_s:%f ", ros::this_node::getName().c_str(),xp_s,yp_s);
-		// publisher.publish(msg);
+		// Publishes state of the robot 
 		geometry_msgs::PoseStamped p_msg;
+		p_msg.header.stamp = now;
 		p_msg.pose.position.x = xp_s;
 		p_msg.pose.position.y = yp_s;
 		p_pub.publish(p_msg);
+
+		// Publishes error of the P 
+		double ex_ = xp_s-xp_;
+		double ey_ = yp_s-yp_;
+		geometry_msgs::Vector3Stamped e_msg;
+		e_msg.header.stamp = now;
+		e_msg.vector.x = ex_;
+		e_msg.vector.y = ey_;
+		// e_msg.vector.z = sqrt(pow(ex_,2)+pow(ey_,2));
+		error_pub.publish(e_msg);
 
 	
 }
@@ -218,13 +205,6 @@ void node::tb_MessageCallback(const geometry_msgs::PoseStamped::ConstPtr &msg)
 	x_s = msg->pose.position.x;
 	y_s = msg->pose.position.y;
 	theta_s = atan2(msg->pose.orientation.z, msg->pose.orientation.w);
-
-	// data aquisition
-	// x   = msg->data[1];   //not really needed
-	// y   = msg->data[2];   //not really needed
-	//   theta = msg->data[3];
-	// xp  = msg->data[4];
-	// yp  = msg->data[5];
 }
 
 int main(int argc, char **argv)
