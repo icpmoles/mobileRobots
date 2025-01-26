@@ -15,6 +15,6 @@
           required="true"
     />
   
-  <param name="/tb_controller/wait" type="double" value="0.1" />
+  <param name="/tb_controller/wait" type="double" value="1.0" />
 
 </launch>
