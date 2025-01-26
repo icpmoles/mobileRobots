@@ -27,17 +27,32 @@ private:
 
 	void tb_MessageCallback(const geometry_msgs::PoseStamped::ConstPtr &msg);
 
-	double xp_dot, yp_dot; // velocity of trajectory: feedforward
-	double xp_, yp_;	   // cartesian coordinates of trajectory: Feed into PID
+	// y^ = set point
+	double xp_dot; // x component of feedforward
+	double yp_dot; // y component of feedforward
+	double xp_;    // x component of trajectory
+	double yp_;	   // y component of trajectory
 
-	double theta_s, x_s, y_s, yp_s, xp_s; // states of the robot
-	double xr, yr;						  // feedback linearization parameters
-	double a, T;						  // trajectory parameters for circle/eight
+	// states of the robot
+	double theta_s; // yaw_state of the robot
+	double x_s;		// x component of COG_state
+	double y_s;		// y component of COG_state
+	double yp_s;	// y component of P_state
+	double xp_s; 	// x component of P_state
+
+	// feedback linearization parameters
+	double xr;		// eta (longitudinal component of lookahead)
+	double yr;		// lateral component of lookahead		
+
+	// trajectory parameters for circle/eight
+	double a;		// trajectory amplitude
+	double T;		// trajectory lap time
+
 	std::string node_name;
 
 	double pid_kc, pid_ti; // PID parameters
-	bool shiftf;
-	double wait;
+	
+	double wait;			// Waits for n seconds before generating a trajectory
 	PID PIDx, PIDy; // le PID: initialized with the same parameter
 
 public:
@@ -60,12 +75,13 @@ void node::Prepare(void)
 	GPMACRO(a);
 	GPMACRO(xr);
 	GPMACRO(yr);
-	GPMACRO(shiftf);
+	GPMACRO(wait);
+	// GPMACRO(shiftf);
 	// GPMACRO(R);
 	feedback_subscriber = Handle.subscribe("/state", 1, &node::tb_MessageCallback, this);
-	publisher = Handle.advertise<geometry_msgs::TwistStamped>("/cmd", 1);
-	sp_pub = Handle.advertise<geometry_msgs::PoseStamped>("/setpoint", 1);
-	p_pub = Handle.advertise<geometry_msgs::PoseStamped>("/state_p", 1);
+	publisher = Handle.advertise<geometry_msgs::TwistStamped>("/cmd", 1); // cmd publisher
+	sp_pub = Handle.advertise<geometry_msgs::PoseStamped>("/setpoint", 1); // setpoint publisher
+	p_pub = Handle.advertise<geometry_msgs::PoseStamped>("/state_p", 1);	// state from feedback linearization publisher
 
 	// theta_s = 0.0;
 
@@ -106,7 +122,8 @@ void node::PeriodicTask(void)
 	double realtime = ros::Time::now().toSec();
 
 	double t;
-	double v,omega,xp_,yp_;
+	double v;		// velocity cmd
+	double omega; 	// twist cmd
 	if (realtime >= wait) {
 		t = realtime - wait;
 	
@@ -114,31 +131,27 @@ void node::PeriodicTask(void)
 
 		// TRAJECTORY GENERATION
 
-		double xg_dot = a * phi * cos(phi * t);
-		double yg_dot = a * phi * cos(2 * phi * t);
-		double xg_ = a * sin(phi * t);
-		double yg_ = a * sin(phi * t) * cos(phi * t);
-		if (shiftf == true)
-		{
-			double alpha_dot = sin(phi * t) / (pow(cos(2 * phi * t), 2) + pow(cos(phi * t), 2));
+		 xp_dot = a * phi * cos(phi * t);
+		 yp_dot = a * phi * cos(2 * phi * t);
+		 xp_ = a * sin(phi * t);
+		 yp_ = a * sin(phi * t) * cos(phi * t);
+		// if (shiftf == true)
+		// {
+		// 	double alpha_dot = sin(phi * t) / (pow(cos(2 * phi * t), 2) + pow(cos(phi * t), 2));
 			
-			double alpha = atan2(xp_dot, yp_dot);
-			xp_ = xg_ + xr * cos(alpha);
-			yp_ = yg_ + xr * sin(alpha);
-			xp_dot = xg_dot - alpha_dot * xr * sin(alpha);
-			yp_dot = yg_dot + alpha_dot * xr * cos(alpha);
-		}
-		else
-		{
-			xp_dot = xg_dot;
-			yp_dot = yg_dot;
-			xp_ = xg_;
-			yp_ = yg_;
-		}
-
-		// LOOKAHEAD ESTIMATION
-		xp_s = x_s + xr * cos(theta_s) - yr * sin(theta_s); //estimated x of P
-		yp_s = y_s + xr * sin(theta_s) + yr * cos(theta_s); //estimated y of P
+		// 	double alpha = atan2(xp_dot, yp_dot);
+		// 	xp_ = xg_ + xr * cos(alpha);
+		// 	yp_ = yg_ + xr * sin(alpha);
+		// 	xp_dot = xg_dot - alpha_dot * xr * sin(alpha);
+		// 	yp_dot = yg_dot + alpha_dot * xr * cos(alpha);
+		// }
+		// else
+		//  {
+		// 	xp_dot = xg_dot;
+		// 	yp_dot = yg_dot;
+		// 	xp_ = xg_;
+		// 	yp_ = yg_;
+		// }
 
 		// COONTROL FEEDBACK
 		PIDx.setMeasurement(xp_s);
@@ -149,15 +162,15 @@ void node::PeriodicTask(void)
 		PIDx.execute();
 		PIDy.execute();
 		// FEED FORWARD
-		double vx = PIDx.getControl() + xp_dot;
-		double vy = PIDy.getControl() + yp_dot;
+		double vx = PIDx.getControl() + xp_dot; // x component of V_ vector
+		double vy = PIDy.getControl() + yp_dot;	// y component of V_ vector
 
 		// double pidy_u_act = PIDy.u_act;
 		// double pidx_u_act = PIDx.u_act;
 
 		// FEEDBACK LINEARIZATION
-		v = (cos(theta_s) - yr * sin(theta_s) / xr) * vx + (sin(theta_s) + yr * cos(theta_s) / xr) * vy;
-		omega = (-sin(theta_s) * vx + cos(theta_s) * vy) / xr;
+		v = (cos(theta_s) - yr * sin(theta_s) / xr) * vx + (sin(theta_s) + yr * cos(theta_s) / xr) * vy; // i component of V_ vector
+		omega = (-sin(theta_s) * vx + cos(theta_s) * vy) / xr;											// "j" component of V_ vector
 
 		// PUBLISHING
 		//   std_msgs::Float64MultiArray msgtosend;
@@ -166,18 +179,21 @@ void node::PeriodicTask(void)
 		//   msgtosend.data[1] = v;
 		//   msgtosend.data[2] = omega;
 		}  else {// else do nothing
-			v,omega,yp_ = 0;
-			xp_ = xr;
+			v,omega=0;
+			yp_ = 0;
+			xp_ = 0;
 
 		}
+		
+		// LOOKAHEAD ESTIMATION
+		xp_s = x_s + xr * cos(theta_s) - yr * sin(theta_s); //estimated x of P
+		yp_s = y_s + xr * sin(theta_s) + yr * cos(theta_s); //estimated y of P
 
 
 		geometry_msgs::TwistStamped msg;
 		msg.header.stamp = ros::Time::now();
 		msg.twist.linear.x = v;
 		msg.twist.angular.z = omega;
-
-		// ROS_INFO("Node %s: received theta: %f\n calculated v:%f w: %f", ros::this_node::getName().c_str(),theta,v,omega);
 		publisher.publish(msg);
 
 		geometry_msgs::PoseStamped sp_msg;

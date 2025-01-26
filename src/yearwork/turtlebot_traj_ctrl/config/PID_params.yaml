@@ -15,15 +15,15 @@
   # /tb_controller/R : 1.0
   /tb_controller/a : 5.0
   /tb_controller/T : 8.0
-  /tb_controller/samplingperiod: 0.005
-  /tb_controller/wait: 1
+  /tb_controller/samplingperiod: 0.01
+  /tb_controller/wait: 5
 
   # PID
-  /tb_controller/pid_kc: 1 #0.5
-  /tb_controller/pid_ti: 23.34 #0.1
+  /tb_controller/pid_kc: 2.1 #1 #1 #0.5
+  /tb_controller/pid_ti: 28.6 #23.34 #0.1
 
   # Feedback linearization parameters
   /tb_controller/xr: 0.1 #eta 
   /tb_controller/yr: 0.0  
 
-  /tb_controller/shiftf: false
+  # /tb_controller/shiftf: false
