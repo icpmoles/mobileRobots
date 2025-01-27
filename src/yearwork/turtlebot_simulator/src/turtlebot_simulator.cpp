@@ -114,7 +114,6 @@ void node_sim::PeriodicTask(void)
 	time_publisher.publish(clockMsg);
 
 	geometry_msgs::PoseStamped poseMsg;
-	
 	poseMsg.header.stamp = ros::Time::now(); // - sent_time;
 	poseMsg.pose.position.x = simY_x;
 	poseMsg.pose.position.y = simY_y;
@@ -124,6 +123,7 @@ void node_sim::PeriodicTask(void)
 
 
 	geometry_msgs::TwistStamped TwistStampedMsg;
+	TwistStampedMsg.header.stamp = ros::Time::now(); 
 	TwistStampedMsg.twist.linear.x = simY_v;
 	TwistStampedMsg.twist.angular.z = simY_omega;
 	simVel_publisher.publish(TwistStampedMsg);

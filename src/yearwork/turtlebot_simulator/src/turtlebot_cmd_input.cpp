@@ -21,14 +21,14 @@ int main(int argc, char **argv)
 
 	ros::Publisher chatter_pub = n.advertise<geometry_msgs::TwistStamped>("cmd", 1);
 	std::string node_name = ros::this_node::getName();
-	float v, omega, scan_period, v_par, omega_par, wave_period, c_t;
+	float v, omega, scan_period, v_par, omega_par, wave_period, c_t, phase;
 	// Handle.getParam(run_period_name, RunPeriod);
 
 	n.getParam(node_name + "/v", v_par);
 	n.getParam(node_name + "/omega", omega_par);
 	n.getParam(node_name + "/scan_period", scan_period);
 	n.getParam(node_name + "/wave_period", wave_period);
-
+	n.getParam(node_name + "/phase", phase);
 	// create publisher object with node.advertise with a type string and name "chatter" and 1 as size of the buffer of the publisher (1 is good most of the time)(can be increased in case your calculations take too much time)
 
 	ros::Rate loop_rate(1.0 / scan_period);
@@ -46,7 +46,7 @@ int main(int argc, char **argv)
 		v = v_par;
 		// omega = - omega_par * (0.5- std::ceil(-std::sin(3.14 * ros::Time::now().toSec() / (wave_period) )));
 
-		if (c_t > 10.0 && c_t < 14.0)
+		if (c_t >= phase)
 		{
 			omega = omega_par;
 		}
@@ -56,7 +56,7 @@ int main(int argc, char **argv)
 		}
 
 		geometry_msgs::TwistStamped msg;
-
+		msg.header.stamp =  ros::Time::now();
 		msg.twist.linear.x = v; // ros msg object only has data field
 
 		msg.twist.angular.z = omega;
