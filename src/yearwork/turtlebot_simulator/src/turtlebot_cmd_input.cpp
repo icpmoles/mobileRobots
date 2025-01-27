@@ -43,11 +43,8 @@ int main(int argc, char **argv)
 		if (ros_t > wait){
 			
 			c_t = fmod(ros_t-wait, wave_period);
-			// switches velocity back and forth
-			// v = v_par * std::ceil(std::sin(3.14 * ros::Time::now().toSec() / (wave_period) ));
-
+			
 			v = v_par;
-			// omega = - omega_par * (0.5- std::ceil(-std::sin(3.14 * ros::Time::now().toSec() / (wave_period) )));
 
 			if (c_t >= phase)
 			{
