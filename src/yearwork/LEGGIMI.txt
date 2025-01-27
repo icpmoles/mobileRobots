@@ -1,0 +1,15 @@
+Relazione in "report.pdf"
+
+Codice Sorgente dei vari nodi nell cartelle "/turtlebot_*"
+
+MATLAB scripts con i necessari bags in "/docs" (instruzioni nel "report.pdf", vignette tratteggiate)
+
+Quick reference:
+
+- Comando per il primo task (traiettoria in open loop):
+
+    roslaunch turtlebot_simulator simulator.launch
+
+- Comando per il secondo task (traiettoria in closed loop):
+
+    roslaunch turtlebot_traj_ctrl PID.launch
