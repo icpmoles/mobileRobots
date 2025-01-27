@@ -15,6 +15,7 @@
   /tb_test/scan_period   : 0.1     # s
   /tb_test/wave_period   : 7.0     #s
   /tb_test/phase   : 5.0     #s  phase<wave_period
+  /tb_test/wait   : 1.0  
   # /traj_planner/a : 5.0
   # /traj_planner/T : 8.0
 

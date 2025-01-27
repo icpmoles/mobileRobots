@@ -21,7 +21,7 @@ int main(int argc, char **argv)
 
 	ros::Publisher chatter_pub = n.advertise<geometry_msgs::TwistStamped>("cmd", 1);
 	std::string node_name = ros::this_node::getName();
-	float v, omega, scan_period, v_par, omega_par, wave_period, c_t, phase;
+	double v, omega, scan_period, v_par, omega_par, wave_period, c_t, phase,wait;
 	// Handle.getParam(run_period_name, RunPeriod);
 
 	n.getParam(node_name + "/v", v_par);
@@ -29,6 +29,7 @@ int main(int argc, char **argv)
 	n.getParam(node_name + "/scan_period", scan_period);
 	n.getParam(node_name + "/wave_period", wave_period);
 	n.getParam(node_name + "/phase", phase);
+	n.getParam(node_name + "/wait", wait);
 	// create publisher object with node.advertise with a type string and name "chatter" and 1 as size of the buffer of the publisher (1 is good most of the time)(can be increased in case your calculations take too much time)
 
 	ros::Rate loop_rate(1.0 / scan_period);
@@ -38,22 +39,29 @@ int main(int argc, char **argv)
 
 	while (ros::ok())
 	{ // standard ros loop, check if ROS is working, exit otherwise
+		double ros_t = ros::Time::now().toSec();
+		if (ros_t > wait){
+			
+			c_t = fmod(ros_t-wait, wave_period);
+			// switches velocity back and forth
+			// v = v_par * std::ceil(std::sin(3.14 * ros::Time::now().toSec() / (wave_period) ));
 
-		c_t = fmod(ros::Time::now().toSec(), wave_period);
-		// switches velocity back and forth
-		// v = v_par * std::ceil(std::sin(3.14 * ros::Time::now().toSec() / (wave_period) ));
+			v = v_par;
+			// omega = - omega_par * (0.5- std::ceil(-std::sin(3.14 * ros::Time::now().toSec() / (wave_period) )));
 
-		v = v_par;
-		// omega = - omega_par * (0.5- std::ceil(-std::sin(3.14 * ros::Time::now().toSec() / (wave_period) )));
-
-		if (c_t >= phase)
-		{
-			omega = omega_par;
-		}
-		else
-		{
+			if (c_t >= phase)
+			{
+				omega = omega_par;
+			}
+			else
+			{
+				omega = 0;
+			}
+		} else {
+			v = 0;
 			omega = 0;
 		}
+
 
 		geometry_msgs::TwistStamped msg;
 		msg.header.stamp =  ros::Time::now();
